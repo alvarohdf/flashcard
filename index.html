@@ -30,13 +30,29 @@
 document.getElementById("btnGerar").addEventListener("click", function() {
   const texto = document.getElementById("entrada").value;
 
-  // IMPORTANTE: agora vamos esperar um objeto
   const resultado = criarCartoes(texto);
 
   document.getElementById("saida").value = resultado.cards;
   document.getElementById("markdownFinal").value = resultado.markdown;
-
 });
+
+// FUNÇÃO PRA SELECIONAR TUDO AO CLICAR
+function selecionarTudo(id) {
+  const el = document.getElementById(id);
+  
+  el.addEventListener("click", function() {
+    el.select();
+  });
+
+  // opcional: também ao focar (ex: tab ou toque)
+  el.addEventListener("focus", function() {
+    el.select();
+  });
+}
+
+// aplicar nas duas áreas
+selecionarTudo("saida");
+selecionarTudo("markdownFinal");
 </script>
 
 </body>
