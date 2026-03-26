@@ -332,7 +332,6 @@ function criarCartoes(textoOriginal)
 	while (i < linhas.length)
  	{
 		linhaSendoAnalisada = linhas[i];
-    		i++;
     		let linhaTrim = linhaSendoAnalisada.trim();
 
 		// ---------- TÍTULOS ----------
@@ -356,46 +355,48 @@ function criarCartoes(textoOriginal)
       			H1 = linhaTrim.substring(2).trim();
       			contexto = `${H1} - `;
 		}
-		// RESETAR CONTEXTO LISTA
-    		if (linhaTrim === '' && (i >= linhas.length || !linhas[i].trim().startsWith('-'))) 
-		{
-			contextoLista = '';
-			contextoListaJaInserido = false;
-    		}
-		if (linhaTrim !== '' && !linhasOriginais[i - 1].includes(SinalCardJaFeito)) 
+		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
   			// -- É LISTA
-			if (linhaSendoAnalisada.trim().startsWith('-')) 
+			if (linhaSendoAnalisada.trim().endsWith('>')) 
 			{
-				// APLICAR CONTEXTO
-			 	if (!contextoListaJaInserido && contextoLista !== '') 
+				contextoLista = linhaSendoAnalisada;
+				cardLista += contextoLista;
+				i++;
+				linhaSendoAnalisada = linhas[i];
+				while (i < linhas.length)
 				{
-    					cardLista += contextoLista;
-					contextoListaJaInserido = true;
-  				}
-				if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes(';;') || linhaSendoAnalisada.trim().endsWith(':') || contextoLista.includes(MarcadorBasic1)) 
-				{
-			    		cardLista += ' ' + TabsLista(
-					ConverterSetaParaCloze(linhaSendoAnalisada));
-  				}
-				if (!linhaSendoAnalisada.trim().endsWith(';') &&!linhaSendoAnalisada.trim().endsWith(':')) 
-				{
-    					// TERMINOU A LISTA
-				    	NivelListaAtual = 0;
-					contextoListaJaInserido = false;
-					if (ProcuraCloze(cardLista) === true ||contextoLista.includes(MarcadorListaInteira)) 
+					if (linhaSendoAnalisada.trim().startsWith('-'))
 					{
-						if (contextoLista.includes(MarcadorBasic1)) 
+						if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes('[]') || linhaSendoAnalisada.trim().endsWith(':')) 
 						{
-	        						cardLista = ConverterSetaParaCloze(cardLista);
+							if (!linhasOriginais[i - 1].includes(SinalCardJaFeito))
+							{
+				    				cardLista += ' ' + TabsLista(ConverterSetaParaCloze(linhaSendoAnalisada));
+  							}
 						}
-						cardsCSV += FormatarCards(contexto, cardLista);
-						markdownFinal = markdownFinal.replace(linhasOriginais[i - 1], linhasOriginais[i - 1] + SinalCardJaFeito);
-						contadorCards++;
-		    			}
-					cardLista = '';
-					cardsExportacao = '';
+						if (linhaSendoAnalisada.trim().endsWith('.'))
+						{
+							// TERMINOU PARTE DA LISTA
+							if (ProcuraCloze(cardLista) === true) 
+							{
+								cardsCSV += FormatarCards(contexto, cardLista);
+								markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+								contadorCards++;
+								cardLista = '';
+								cardLista += contextoLista;
+			    				}
+						}
+  					}
+					i++;
+					if (i === linhas.length)
+					{
+						//ÚLTIMA LINHA DA ENTRADA
+						break;
+					}
+					linhaSendoAnalisada = linhas[i];
 				}
+				contextoLista = '';
 			}
 			//-- FIM LISTA
 			// -- É TABELA
@@ -403,7 +404,6 @@ function criarCartoes(textoOriginal)
 			{
 				linhasTabela = [];
   				j = 0;
-				i = i - 1;
   				k = i; // início da tabela
 				while (linhas[i] && linhas[i].trim().startsWith('|')) 
 				{
@@ -438,35 +438,28 @@ function criarCartoes(textoOriginal)
 			// ---------- PARAGRAFÃO ----------
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
-				k = i-1;
-				while (k < linhas.length)
+				cardLista += linhaSendoAnalisada;
+				i++;
+				linhaSendoAnalisada = linhas[i];
+				while (i < linhas.length)
 				{
-					let linhaTemp = linhas[k].trim();
-					if (linhaTemp !== '') 
+					if (linhaSendoAnalisada.trim() !== '') 
 					{
-    						cardLista += TabsLista(linhaTemp) + ' ';
-
-  					}
-					if (linhaTemp.trim().endsWith('.'))
+    						cardLista += TabsLista(linhaSendoAnalisada) + ' ';
+ 					}
+					if (linhaSendoAnalisada.trim().endsWith('.'))
    					{
 						break;
   					}
-					k++;
+					i++;
+					linhaSendoAnalisada = linhas[i];
 				}
-				cardsCSV += FormatarCards(contexto,  contextoParagrafo + cardLista);
+				cardsCSV += FormatarCards(contexto, cardLista);
 				cardLista = '';
 				// marcar como feito
-        			markdownFinal = markdownFinal.replace(linhasOriginais[k], linhasOriginais[k] + SinalCardJaFeito);
+        			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 				contadorCards++;
 				contextoParagrafo = '';
-				if (k < linhas.length) 
-				{
-					linhaSendoAnalisada = linhas[k+1];
-				} 
-				else 
-				{
-					linhaSendoAnalisada = '';
-				}
 			}
 			// ---------- CARD ÚNICO com cloze provavelmente
 			else 
@@ -489,16 +482,6 @@ function criarCartoes(textoOriginal)
 			// -- OBTER CONTEXTOS
 			if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
 			{
-				// CONTEXTO DE LISTA
-  				if (contextoLista !== '') 
-				{
-					contextoLista = contextoLista + ' ' + TabsLista(linhaSendoAnalisada);
-				} 
-				else
-				{
-					contextoLista = linhaSendoAnalisada;
-				}
-				// CONTEXTO DE PARÁGRAFO
 				contextoParagrafo = linhaSendoAnalisada + ' ';
 			}
 
@@ -511,7 +494,7 @@ function criarCartoes(textoOriginal)
     				contextoParagrafo = '';
   			}
 		}
-
+		i++;
 	}
 	// FINAL
 	markdownFinal = markdownFinal.replaceAll('%%', '**');
