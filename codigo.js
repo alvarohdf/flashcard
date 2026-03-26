@@ -431,7 +431,7 @@ function criarCartoes(textoOriginal)
 				}
 			}
 			// ---------- PARAGRAFÃO ----------
-			else if (texto.indexOf(MarcadorBasic1) > -1 || texto.indexOf(MarcadorBasic2) > -1)
+			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
 				k = i;
 				cardLista = linhaSendoAnalisada;
