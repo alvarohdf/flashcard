@@ -358,7 +358,7 @@ function criarCartoes(textoOriginal)
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
   			// -- É LISTA
-			if (linhaSendoAnalisada.trim().endsWith('>')) 
+			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) && linhas[i + 1].trim().startsWith('-'))
 			{
 				contextoLista = linhaSendoAnalisada;
 				cardLista += contextoLista;
