@@ -474,7 +474,7 @@ function criarCartoes(textoOriginal)
 					{
 						cardsCSV += FormatarCards(contexto, ConverterSetaParaCloze(linhaSendoAnalisada));
 					}
-					markdownFinal = markdownFinal.replace(linhasOriginais[i - 1], linhasOriginais[i - 1] + SinalCardJaFeito);
+					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 					contadorCards++;
 				}
 			}
