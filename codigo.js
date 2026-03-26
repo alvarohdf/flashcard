@@ -361,42 +361,8 @@ function criarCartoes(textoOriginal)
     		}
 		if (linhaTrim !== '' && !linhasOriginais[i - 1].includes(SinalCardJaFeito)) 
 		{
-			// ---------- PARAGRAFÃO ----------
-			if (linhaTrim.endsWith(MarcadorBasic1) ||  linhaTrim.endsWith(MarcadorBasic2)) 
-			{
-
-				k = i;
-				cardLista = linhaSendoAnalisada;
-				while (k < linhas.length) 
-				{
-					let linhaTemp = linhas[k];
-					if (linhaTemp !== '') 
-					{
-						cardLista += TabsLista(linhaTemp) + ' ';
-          					}
-					k++;
-					if (linhaTemp.trim().endsWith('.')) 
-					{
-            						break;
-          					}
-				
-				}
-				cardsCSV += FormatarCards(contexto,  contextoParagrafo + cardLista);
-				// marcar como feito
-        				markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
-				cardLista = '';
-				contextoParagrafo = '';
-				if (k < linhas.length) 
-				{
-					linhaSendoAnalisada = linhas[k];
-				} 
-				else 
-				{
-					linhaSendoAnalisada = '';
-				}
-			}
   			// -- É LISTA
-			else if (linhaSendoAnalisada.trim().startsWith('-')) 
+			if (linhaSendoAnalisada.trim().startsWith('-')) 
 			{
 				// APLICAR CONTEXTO
 			 	if (!contextoListaJaInserido && contextoLista !== '') 
@@ -464,7 +430,40 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// ---------- CARD ÚNICO ----------
+			// ---------- PARAGRAFÃO ----------
+			else if (texto.indexOf(MarcadorBasic1) > -1 || texto.indexOf(MarcadorBasic2) > -1)
+			{
+				k = i;
+				cardLista = linhaSendoAnalisada;
+				while (k < linhas.length) 
+				{
+					let linhaTemp = linhas[k];
+					if (linhaTemp !== '') 
+					{
+						cardLista += TabsLista(linhaTemp) + ' ';
+          				}
+					k++;
+					if (linhaTemp.trim().endsWith('.')) 
+					{
+            					break;
+          				}
+				
+				}
+				cardsCSV += FormatarCards(contexto,  contextoParagrafo + cardLista);
+				// marcar como feito
+        				markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
+				cardLista = '';
+				contextoParagrafo = '';
+				if (k < linhas.length) 
+				{
+					linhaSendoAnalisada = linhas[k];
+				} 
+				else 
+				{
+					linhaSendoAnalisada = '';
+				}
+			}
+			// ---------- CARD ÚNICO com cloze provavelmente
 			else 
 			{
 				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
