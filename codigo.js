@@ -158,6 +158,17 @@ function ConverterSetaParaCloze(texto)
 	let resultado = texto;
   	let marcador = MarcadorBasic1;
 
+	// dar espaço antes do marcador ??
+	if (!(texto.indexOf(' ' + MarcadorBasic1) > -1)) 
+	{
+        	texto = texto.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
+      	}
+	// dar espaço antes do marcador ⇒
+      	if (!(texto.indexOf(' ' + MarcadorBasic2) > -1)) 
+	{
+		texto = texto.replace(MarcadorBasic2, ' ' + MarcadorBasic2);
+      	}
+
   	if (texto.includes(MarcadorBasic2)) 
 	{
     		marcador = MarcadorBasic2;
@@ -203,6 +214,10 @@ function ConverterSetaParaCloze(texto)
 		// próximo marcador (equivalente ao PosEx)
     		p = resultado.indexOf(marcador, p + 1);
  	}
+	if (texto.indexOf('??') > -1) 
+	{
+       		resultado = resultado.replace(MarcadorCloze, '?' + ' ' + MarcadorCloze);
+	} 
  	return resultado;
 }
 
@@ -212,45 +227,17 @@ function FormatarCards(contexto, cards)
 {
 	let novoContexto;
 	let novoResult;
-	try 
-	{    
-		novoContexto = limpaMarkdownProAnki(contexto);
-    		if (novoContexto !== '') 
-		{
-      			novoContexto = novoContexto;
-    		}
-    		novoResult = limpaMarkdownProAnki(cards);
-		if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
-		 {
-			// dar espaço antes do marcador ??
-			if (!(novoResult.indexOf(' ' + MarcadorBasic1) > -1)) 
-			{
-        				novoResult = novoResult.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
-      			}
-			// dar espaço antes do marcador ⇒
-      			if (!(novoResult.indexOf(' ' + MarcadorBasic2) > -1)) 
-			{
-				novoResult = novoResult.replace(MarcadorBasic2, ' ' + MarcadorBasic2);
-      			}
-			if (cards.indexOf('??') > -1) 
-			{
-        				novoResult = ConverterSetaParaCloze(novoResult);
-				novoResult = novoResult.replace(' `', '? `');
-			} 
-			else 
-			{
-        				novoResult = ConverterSetaParaCloze(novoResult);
-      			}
-    		}
-		if (novoResult.indexOf(MarcadorCloze) > -1) 
-		{
-			return GerarCardsClozeParaBasic(novoContexto, novoResult, MarcadorCloze);
-		}
-	} 
-	catch (e) 
+	novoContexto = limpaMarkdownProAnki(contexto);
+    	novoResult = limpaMarkdownProAnki(cards);
+	if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
 	{
-		throw new Error('Erro em FormatarCards: ' + e.message);
-  	}
+        	novoResult = ConverterSetaParaCloze(novoResult);
+    	}
+	if (novoResult.indexOf(MarcadorCloze) > -1) 
+	{
+		return GerarCardsClozeParaBasic(novoContexto, novoResult, MarcadorCloze);
+	} 
+
 }
 
 function ContarTabs(s) {
@@ -327,10 +314,12 @@ function criarCartoes(textoOriginal)
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
 	
   	linhas = textoSeraLido.split('\n');
+	linhas.push('', ''); // acrescenta duas em branco pra evitar erros pois eu faço leituras [i+1, i+2]
   	linhasOriginais = textoOriginal.split('\n');
 	
 	while (i < linhas.length)
  	{
+		cardLista = '';
 		linhaSendoAnalisada = linhas[i];
     		let linhaTrim = linhaSendoAnalisada.trim();
 
@@ -358,45 +347,47 @@ function criarCartoes(textoOriginal)
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
   			// -- É LISTA
-			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) && linhas[i + 1].trim().startsWith('-'))
+			if (linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?'))
 			{
-				contextoLista = linhaSendoAnalisada;
-				cardLista += contextoLista;
-				i++;
-				linhaSendoAnalisada = linhas[i];
-				while (i < linhas.length)
+				if (linhas[i+1].startsWith('-') || linhas[i+2].startsWith('-'))
 				{
-					if (linhaSendoAnalisada.trim().startsWith('-'))
-					{
-						if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes('[]') || linhaSendoAnalisada.trim().endsWith(':')) 
-						{
-							if (!linhasOriginais[i - 1].includes(SinalCardJaFeito))
-							{
-				    				cardLista += ' ' + TabsLista(ConverterSetaParaCloze(linhaSendoAnalisada));
-  							}
-						}
-						if (linhaSendoAnalisada.trim().endsWith('.'))
-						{
-							// TERMINOU PARTE DA LISTA
-							if (ProcuraCloze(cardLista) === true) 
-							{
-								cardsCSV += FormatarCards(contexto, cardLista);
-								markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
-								contadorCards++;
-								cardLista = '';
-								cardLista += contextoLista;
-			    				}
-						}
-  					}
+					contextoLista = linhaSendoAnalisada;
+					cardLista += contextoLista;
 					i++;
-					if (i === linhas.length)
-					{
-						//ÚLTIMA LINHA DA ENTRADA
-						break;
-					}
 					linhaSendoAnalisada = linhas[i];
+					while (i < linhas.length)
+					{
+						if (linhaSendoAnalisada.trim().startsWith('-'))
+						{ // É ITEM LISTA
+							if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes('[]') || linhaSendoAnalisada.trim().endsWith(':')) 
+							{
+								if (!linhasOriginais[i - 1].includes(SinalCardJaFeito))
+								{
+				    					cardLista += ' ' + TabsLista(ConverterSetaParaCloze(linhaSendoAnalisada));
+  								}
+							}
+							if (linhaSendoAnalisada.trim().endsWith('.'))
+							{
+								// TERMINOU PARTE DA LISTA = .
+								if (ProcuraCloze(cardLista) === true) 
+								{
+									cardsCSV += FormatarCards(contexto, cardLista);
+									markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+									contadorCards++;
+									cardLista = '';
+									cardLista += contextoLista;
+			    					}
+							}
+						}
+						if (!linhas[i+1].trim().startsWith('-'))	
+						{ // TERMINOU TODA A LISTA
+							break;
+						}
+						// CONTINUAR, TEM MAIS LISTA.
+						i++;
+						linhaSendoAnalisada = linhas[i];
+					}
 				}
-				contextoLista = '';
 			}
 			//-- FIM LISTA
 			// -- É TABELA
@@ -435,26 +426,34 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// ---------- PARAGRAFÃO ----------
+			// ---------- CARD SETA ----------
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
 				cardLista += linhaSendoAnalisada;
-				i++;
-				linhaSendoAnalisada = linhas[i];
-				while (i < linhas.length)
-				{
-					if (linhaSendoAnalisada.trim() !== '') 
-					{
-    						cardLista += TabsLista(linhaSendoAnalisada) + ' ';
- 					}
-					if (linhaSendoAnalisada.trim().endsWith('.'))
-   					{
-						break;
-  					}
+				if (!linhaSendoAnalisada.endsWith('.')) // tem mais = PARAGRAFÃO
+				{				
 					i++;
 					linhaSendoAnalisada = linhas[i];
+					while (i < linhas.length)
+					{
+						if (linhaSendoAnalisada.trim() !== '') 
+						{
+    							cardLista += TabsLista(linhaSendoAnalisada) + ' ';
+	 					}
+						if (linhaSendoAnalisada.trim().endsWith('.'))
+   						{
+							break;
+  						}
+					}
 				}
-				cardsCSV += FormatarCards(contexto, cardLista);
+				if (contextoParagrafo !== '') 
+				{
+					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
+				} 
+				else 
+				{
+					cardsCSV += FormatarCards(contexto, cardLista);
+				}
 				cardLista = '';
 				// marcar como feito
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
@@ -479,20 +478,19 @@ function criarCartoes(textoOriginal)
 					contadorCards++;
 				}
 			}
+			// resetar contexto paragrafo
+			if (contextoParagrafo !== '') 
+			{
+				if (linhaSendoAnalisada.endsWith('.')) 
+				{
+    					contextoParagrafo = '';
+  				}
+			}
 			// -- OBTER CONTEXTOS
 			if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
 			{
 				contextoParagrafo = linhaSendoAnalisada + ' ';
 			}
-
-		}
-		// resetar contexto paragrafo
-		if (contextoParagrafo !== '') 
-		{
-			if (linhaSendoAnalisada.trim() !== contextoParagrafo.trim() && linhaSendoAnalisada !== '') 
-			{
-    				contextoParagrafo = '';
-  			}
 		}
 		i++;
 	}
