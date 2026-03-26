@@ -456,7 +456,7 @@ function criarCartoes(textoOriginal)
 				cardsCSV += FormatarCards(contexto,  contextoParagrafo + cardLista);
 				cardLista = '';
 				// marcar como feito
-        			markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
+        			markdownFinal = markdownFinal.replace(linhasOriginais[k], linhasOriginais[k] + SinalCardJaFeito);
 				contadorCards++;
 				contextoParagrafo = '';
 				if (k < linhas.length) 
