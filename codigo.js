@@ -298,7 +298,7 @@ function TabsLista(linha) {
 
 function criarCartoes(textoOriginal) 
 {
-  let i = 0, j = 0, k = 0;
+  let i = 0, j = 0, k = 0, contadorCards = 0;
 
   let linhas = [];
   let linhasOriginais = [];
@@ -317,21 +317,24 @@ function criarCartoes(textoOriginal)
 
   let cardsCSV = '';
 
-  let textoSeraLido = textoOriginal;
-  textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
-  textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
-  textoSeraLido = textoSeraLido.replaceAll('→', '➜');
+	textoOriginal = textoOriginal.replace(/\\#/g, '#');
+	let textoSeraLido = textoOriginal;
 
-  let markdownFinal = textoOriginal;
-
-  linhas = textoSeraLido.split('\n');
-  linhasOriginais = textoOriginal.split('\n');
+	// Mantém original
+	let markdownFinal = textoOriginal;
+	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
+  	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
+  	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
+	
+  	linhas = textoSeraLido.split('\n');
+  	linhasOriginais = textoOriginal.split('\n');
+	
 	while (i < linhas.length)
  	{
 		linhaSendoAnalisada = linhas[i];
     		i++;
     		let linhaTrim = linhaSendoAnalisada.trim();
-		
+
 		// ---------- TÍTULOS ----------
     		if (linhaTrim.startsWith('####')) 
 		{
@@ -388,6 +391,7 @@ function criarCartoes(textoOriginal)
 						}
 						cardsCSV += FormatarCards(contexto, cardLista);
 						markdownFinal = markdownFinal.replace(linhasOriginais[i - 1], linhasOriginais[i - 1] + SinalCardJaFeito);
+						contadorCards++;
 		    			}
 					cardLista = '';
 					cardsExportacao = '';
@@ -422,6 +426,7 @@ function criarCartoes(textoOriginal)
 						let textoAntesBarra = linhasOriginais[k].substring(0, posBarraFinal);
 						let tabelaMarkdownFinal = linhasOriginais[k].replace(textoAntesBarra, textoAntesBarra.trim() + SinalCardJaFeito);
 						markdownFinal = markdownFinal.replace(linhasOriginais[k], tabelaMarkdownFinal);
+						contadorCards++;
 					}
 					k++;
 					if (linhasOriginais[k] === '') 
@@ -452,6 +457,7 @@ function criarCartoes(textoOriginal)
 				cardLista = '';
 				// marcar como feito
         			markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
+				contadorCards++;
 				contextoParagrafo = '';
 				if (k < linhas.length) 
 				{
@@ -477,6 +483,7 @@ function criarCartoes(textoOriginal)
 						cardsCSV += FormatarCards(contexto, ConverterSetaParaCloze(linhaSendoAnalisada));
 					}
 					markdownFinal = markdownFinal.replace(linhasOriginais[i - 1], linhasOriginais[i - 1] + SinalCardJaFeito);
+					contadorCards++;
 				}
 			}
 			// -- OBTER CONTEXTOS
@@ -504,12 +511,16 @@ function criarCartoes(textoOriginal)
     				contextoParagrafo = '';
   			}
 		}
-		// FINAL
-		markdownFinal = markdownFinal.replaceAll('%%', '**');
-		cardsCSV = cardsCSV.replaceAll(',', '.');
+
 	}
+	// FINAL
+	markdownFinal = markdownFinal.replaceAll('%%', '**');
+	cardsCSV = cardsCSV.replaceAll(',', '.');
+	contadorCards = contadorCards * SinalCardJaFeito.length;
+
 	return {
   		cards: cardsCSV,
-		markdown: markdownFinal
+		markdown: markdownFinal,
+		contagem: contadorCards
 	};
 }

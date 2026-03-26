@@ -26,6 +26,7 @@
 <textarea id="markdownFinal"></textarea>
 <div class="contador" id="contadorEntrada">Caracteres Entrada: 0</div>
 <div class="contador" id="contadorMarkdown">Caracteres Markdown Final: 0</div>
+<div class="contador" id="contadorCards">Caracteres a mais esperado: 0</div>
 
 <script src="codigo.js"></script>
 
@@ -37,6 +38,7 @@ document.getElementById("btnGerar").addEventListener("click", function() {
 
   document.getElementById("saida").value = resultado.cards;
   document.getElementById("markdownFinal").value = resultado.markdown;
+  document.getElementById("contadorCards").innerText = "Caracteres a mais esperado: " + resultado.contagem;
 
   atualizarContadores();
 });
