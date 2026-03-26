@@ -433,30 +433,29 @@ function criarCartoes(textoOriginal)
 			// ---------- PARAGRAFÃO ----------
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
-				k = i;
-				cardLista = linhaSendoAnalisada;
-				while (k < linhas.length) 
+				k = i-1;
+				while (k < linhas.length)
 				{
-					let linhaTemp = linhas[k];
+					let linhaTemp = linhas[k].trim();
 					if (linhaTemp !== '') 
 					{
-						cardLista += TabsLista(linhaTemp) + ' ';
-          				}
+    						cardLista += TabsLista(linhaTemp) + ' ';
+
+  					}
+					if (linhaTemp.trim().endsWith('.'))
+   					{
+						break;
+  					}
 					k++;
-					if (linhaTemp.trim().endsWith('.')) 
-					{
-            					break;
-          				}
-				
 				}
 				cardsCSV += FormatarCards(contexto,  contextoParagrafo + cardLista);
-				// marcar como feito
-        				markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
 				cardLista = '';
+				// marcar como feito
+        			markdownFinal = markdownFinal.replace(linhasOriginais[k - 1], linhasOriginais[k - 1] + SinalCardJaFeito);
 				contextoParagrafo = '';
 				if (k < linhas.length) 
 				{
-					linhaSendoAnalisada = linhas[k];
+					linhaSendoAnalisada = linhas[k+1];
 				} 
 				else 
 				{
