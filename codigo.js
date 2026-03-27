@@ -185,7 +185,7 @@ function ConverterSetaParaCloze(texto)
 		{
 			fim++;
     		}
-    		if ( contarTxtNaString(texto, MarcadorBasic1) > 1 || contarTxtNaString(texto, MarcadorBasic2) > 1) 
+    		if ( contarTxtNaString(texto, MarcadorBasic1) > 1 || contarTxtNaString(texto, MarcadorBasic2) > 1 || contarTxtNaString(texto, MarcadorCloze) > 1) 
 		{
       			// achar o primeiro ponto
       			while (fim < resultado.length && resultado[fim] !== '.') 
@@ -218,6 +218,7 @@ function ConverterSetaParaCloze(texto)
 	{
        		resultado = resultado.replace(MarcadorCloze, '?' + ' ' + MarcadorCloze);
 	} 
+alert(resultado);
  	return resultado;
 }
 
@@ -426,11 +427,11 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// ---------- CARD SETA ----------
+			// -- CARD COM SETA, SEM SER LISTA
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
 				cardLista += linhaSendoAnalisada;
-				if (!linhaSendoAnalisada.endsWith('.')) // tem mais = PARAGRAFÃO
+				if (linhaSendoAnalisada.endsWith(';')) // tem mais = PARAGRAFÃO. ; = CONTINUA
 				{				
 					while (i < linhas.length)
 					{
