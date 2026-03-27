@@ -347,7 +347,7 @@ function criarCartoes(textoOriginal)
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
   			// -- É LISTA
-			if (linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?'))
+			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) &&  !linhaSendoAnalisada.trim().endsWith('??'))
 			{
 				if (linhas[i+1].startsWith('-') || linhas[i+2].startsWith('-'))
 				{
@@ -432,10 +432,10 @@ function criarCartoes(textoOriginal)
 				cardLista += linhaSendoAnalisada;
 				if (!linhaSendoAnalisada.endsWith('.')) // tem mais = PARAGRAFÃO
 				{				
-					i++;
-					linhaSendoAnalisada = linhas[i];
 					while (i < linhas.length)
 					{
+						i++;
+						linhaSendoAnalisada = linhas[i];
 						if (linhaSendoAnalisada.trim() !== '') 
 						{
     							cardLista += TabsLista(linhaSendoAnalisada) + ' ';
