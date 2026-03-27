@@ -218,7 +218,6 @@ function ConverterSetaParaCloze(texto)
 	{
        		resultado = resultado.replace(MarcadorCloze, '?' + ' ' + MarcadorCloze);
 	} 
-alert(resultado);
  	return resultado;
 }
 
@@ -310,6 +309,7 @@ function criarCartoes(textoOriginal)
 
 	// Mantém original
 	let markdownFinal = textoOriginal;
+
 	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
   	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
@@ -431,8 +431,8 @@ function criarCartoes(textoOriginal)
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
 				cardLista += linhaSendoAnalisada;
-				if (linhaSendoAnalisada.endsWith(';')) // tem mais = PARAGRAFÃO. ; = CONTINUA
-				{				
+				if (!linhaSendoAnalisada.endsWith('.')) // tem mais = PARAGRAFÃO.
+				{ // Não pode ser ; pois se eu quiser colocar um paciente deitado: - próxima linha?				
 					while (i < linhas.length)
 					{
 						i++;
