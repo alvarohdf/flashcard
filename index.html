@@ -18,6 +18,7 @@
 <textarea id="entrada"></textarea>
 
 <button id="btnGerar">Gerar</button>
+<button id="btnExportar">Exportar</button>
 
 <h2>Saída (Cards)</h2>
 <textarea id="saida"></textarea>
@@ -42,6 +43,18 @@ document.getElementById("btnGerar").addEventListener("click", function() {
 
   atualizarContadores();
 });
+
+document.getElementById("btnExportar").addEventListener("click", function() 
+{
+  const texto = document.getElementById("saida").value;
+  if (!texto.trim()) {
+    alert("Nada para exportar.");
+    return;
+  }
+
+  exportarCSV(texto);
+});
+
 
 // FUNÇÃO PRA SELECIONAR TUDO AO CLICAR
 function selecionarTudo(id) {

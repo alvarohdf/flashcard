@@ -431,7 +431,6 @@ function criarCartoes(textoOriginal)
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
 				cardLista += linhaSendoAnalisada;
-
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -507,4 +506,33 @@ function criarCartoes(textoOriginal)
 		markdown: markdownFinal,
 		contagem: contadorCards
 	};
+}
+function exportarCSV(texto) 
+{
+  const agora = new Date();
+
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+
+  const hora = String(agora.getHours()).padStart(2, '0');
+  const minuto = String(agora.getMinutes()).padStart(2, '0');
+
+  const nomeArquivo = `cards_${dia}${mes}_${hora}${minuto}.csv`;
+
+  // 👇 adiciona BOM para corrigir acentuação no Excel
+  const conteudo = "\uFEFF" + texto;
+
+  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.href = url;
+  link.download = nomeArquivo;
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
