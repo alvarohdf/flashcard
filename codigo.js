@@ -214,7 +214,7 @@ function ConverterSetaParaCloze(texto)
 		// próximo marcador (equivalente ao PosEx)
     		p = resultado.indexOf(marcador, p + 1);
  	}
-	if (texto.indexOf('??') > -1) 
+	if (texto.indexOf(MarcadorBasic1) > -1 || texto.indexOf(MarcadorBasic2) > -1) // antes era só se fosse com ?? 
 	{
        		resultado = resultado.replace(MarcadorCloze, '?' + ' ' + MarcadorCloze);
 	} 
