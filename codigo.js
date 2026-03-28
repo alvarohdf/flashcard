@@ -313,6 +313,7 @@ function criarCartoes(textoOriginal)
 	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
   	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
+	  textoSeraLido = textoSeraLido.replaceAll(',', '.'); // tirar , pois é separador card em muitos apps
 	
   	linhas = textoSeraLido.split('\n');
 	linhas.push('', ''); // acrescenta duas em branco pra evitar erros pois eu faço leituras [i+1, i+2]
@@ -498,7 +499,6 @@ function criarCartoes(textoOriginal)
 	}
 	// FINAL
 	markdownFinal = markdownFinal.replaceAll('%%', '**');
-	cardsCSV = cardsCSV.replaceAll(',', '.');
 	contadorCards = contadorCards * SinalCardJaFeito.length;
 
 	return {
