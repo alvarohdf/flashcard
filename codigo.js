@@ -434,7 +434,7 @@ function criarCartoes(textoOriginal)
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
-				if (!linhaSendoAnalisada.endsWith('.')) // tem mais = PARAGRAFÃO.
+				if (!linhaSendoAnalisada.trim().endsWith('.')) // tem mais = PARAGRAFÃO.
 				{ // Não pode ser ; pois se eu quiser colocar um paciente deitado: - próxima linha?				
 					while (i < linhas.length)
 					{
