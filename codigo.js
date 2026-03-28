@@ -145,7 +145,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
         				textoPergunta = textoPergunta.replace(alvo, '...');
 			}
     		}
-		resultado +=contexto +textoPergunta +SeparadorPerguntaResposta +textoResposta +'\n'; 
+		resultado +=contexto +textoPergunta +'tempSeparador' +textoResposta +'\n'; 
 		// equivalente ao sLineBreak
   	}
 	return resultado;
@@ -313,7 +313,6 @@ function criarCartoes(textoOriginal)
 	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
   	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
-	  textoSeraLido = textoSeraLido.replaceAll(',', '.'); // tirar , pois é separador card em muitos apps
 	
   	linhas = textoSeraLido.split('\n');
 	linhas.push('', ''); // acrescenta duas em branco pra evitar erros pois eu faço leituras [i+1, i+2]
@@ -499,6 +498,8 @@ function criarCartoes(textoOriginal)
 	}
 	// FINAL
 	markdownFinal = markdownFinal.replaceAll('%%', '**');
+	cardsCSV = cardsCSV.replaceAll(',', '.');
+	cardsCSV= cardsCSV.replaceAll('tempSeparador', SeparadorPerguntaResposta);
 	contadorCards = contadorCards * SinalCardJaFeito.length;
 
 	return {
