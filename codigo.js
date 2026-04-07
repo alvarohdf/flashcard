@@ -355,7 +355,7 @@ function criarCartoes(textoOriginal)
 		}
 		else if (linhaTrim.startsWith('ARQ '))
 		{
-				AssuntoNomeArq = linhaTrim.substring(2).trim();
+				AssuntoNomeArq = linhaTrim.substring(4).trim();
 				contexto = `${AssuntoNomeArq} - `;
 		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
