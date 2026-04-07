@@ -515,6 +515,10 @@ function criarCartoes(textoOriginal)
 	{
 		cardsCSV = cardsCSV.replaceAll(',', '.');
 	}	
+	if (SeparadorPerguntaResposta === ';')
+	{
+		cardsCSV = cardsCSV.replaceAll(';', ',');
+	}	
 	cardsCSV= cardsCSV.replaceAll('tempSeparador', SeparadorPerguntaResposta);
 	contadorCards = contadorCards * SinalCardJaFeito.length;
 
