@@ -186,15 +186,15 @@ function ConverterSetaParaCloze(texto)
 			fim++;
     		}
     		if ( contarTxtNaString(texto, MarcadorBasic1) > 1 || contarTxtNaString(texto, MarcadorBasic2) > 1 || contarTxtNaString(texto, MarcadorCloze) > 1) 
-		{
-      			// achar o primeiro ponto
-      			while (fim < resultado.length && resultado[fim] !== '.') 
+		{ // mais de um cloze
+      			// achar o primeiro ponto para finalizar seta cloze
+      			while (fim < resultado.length && resultado[fim] !== ';') 
 			{
         				fim++;
 			}
       		}
 		else 
-		{
+		{ // um cloze só
       			// até fim da linha
       			while (fim < resultado.length && resultado[fim] !== '\n' && resultado[fim] !== '\r') 
 			{
@@ -343,17 +343,20 @@ function criarCartoes(textoOriginal)
     		}
     	else if (linhaTrim.startsWith('# ')) 
 		{
-      			if (AssuntoNomeArq === '')
+      			if (AssuntoNomeArq !== '') 
 				{
-					AssuntoNomeArq = linhaTrim.substring(2).trim();
-					contexto = `${AssuntoNomeArq} - `;
+					H1 =  AssuntoNomeArq + ' - ' + linhaTrim.substring(2).trim();
 				}
 				else
 				{
-					H1 =  AssuntoNomeArq + ' - ' + linhaTrim.substring(2).trim();
-      				contexto = `${H1} - `;
-				}
-				
+					H1 = linhaTrim.substring(2).trim();
+				} 
+				contexto = `${H1} - `;			
+		}
+		else if (linhaTrim.startsWith('ARQ '))
+		{
+				AssuntoNomeArq = linhaTrim.substring(2).trim();
+				contexto = `${AssuntoNomeArq} - `;
 		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
