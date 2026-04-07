@@ -298,6 +298,7 @@ function criarCartoes(textoOriginal)
   let linhaSendoAnalisada = '';
   let linhasTabela = [];
 
+	let AssuntoNomeArq = ''
   let contexto = '';
   let cardLista = '';
   let tabelaMarkdownFinal = '';
@@ -340,10 +341,18 @@ function criarCartoes(textoOriginal)
 			H2 = linhaTrim.substring(2).trim();
 			contexto = `${H1} - ${H2} - `;
     		}
-    		else if (linhaTrim.startsWith('# ')) 
+    	else if (linhaTrim.startsWith('# ')) 
 		{
-      			H1 = linhaTrim.substring(2).trim();
-      			contexto = `${H1} - `;
+      			if (AssuntoNomeArq === '')
+				{
+					AssuntoNomeArq = linhaTrim.substring(2).trim();
+				}
+				else
+				{
+					H1 =  AssuntoNomeArq + ' - ' + linhaTrim.substring(2).trim();
+      				contexto = `${H1} - `;
+				}
+				
 		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
