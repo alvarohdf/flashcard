@@ -346,6 +346,7 @@ function criarCartoes(textoOriginal)
       			if (AssuntoNomeArq === '')
 				{
 					AssuntoNomeArq = linhaTrim.substring(2).trim();
+					contexto = `${AssuntoNomeArq} - `;
 				}
 				else
 				{
