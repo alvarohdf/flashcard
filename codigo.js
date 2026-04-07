@@ -1,6 +1,6 @@
 // CONSTANTES
 const SinalCardJaFeito = ' --';
-const SeparadorPerguntaResposta = ','; // >> = remnote
+const SeparadorPerguntaResposta = ';'; // >> = remnote
 const MarcadorCloze = '`';
 const MarcadorBasic2 = '⇒';
 const MarcadorBasic1 = '??';
@@ -511,7 +511,10 @@ function criarCartoes(textoOriginal)
 	}
 	// FINAL
 	markdownFinal = markdownFinal.replaceAll('%%', '**');
-	cardsCSV = cardsCSV.replaceAll(',', '.');
+	if (SeparadorPerguntaResposta === ',')
+	{
+		cardsCSV = cardsCSV.replaceAll(',', '.');
+	}	
 	cardsCSV= cardsCSV.replaceAll('tempSeparador', SeparadorPerguntaResposta);
 	contadorCards = contadorCards * SinalCardJaFeito.length;
 
