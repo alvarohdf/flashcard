@@ -363,7 +363,7 @@ function criarCartoes(textoOriginal)
   			// -- É LISTA
 			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) &&  !linhaSendoAnalisada.trim().endsWith('??'))
 			{
-				if (linhas[i+1].startsWith('-') || linhas[i+2].startsWith('-'))
+				if (linhas[i+1].startsWith('-'))
 				{
 					contextoLista = linhaSendoAnalisada;
 					cardLista += contextoLista;
