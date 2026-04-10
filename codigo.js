@@ -9,6 +9,7 @@ const MarcadorBasicAtras = '<~';
 const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = 'XXX';
+const CaractereListaPraIncluirMesmoSemCard = '[]';
 
 // ---------------- UTIL ----------------
 
@@ -373,7 +374,7 @@ function criarCartoes(textoOriginal)
 					{
 						if (linhaSendoAnalisada.trim().startsWith('-'))
 						{ // É ITEM LISTA
-							if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes('[]') || linhaSendoAnalisada.trim().endsWith(':')) 
+							if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes(CaractereListaPraIncluirMesmoSemCard) || linhaSendoAnalisada.trim().endsWith(':')) 
 							{
 								if (!linhasOriginais[i - 1].includes(SinalCardJaFeito))
 								{
@@ -390,7 +391,7 @@ function criarCartoes(textoOriginal)
 									contadorCards++;
 									cardLista = '';
 									cardLista += contextoLista;
-			    					}
+			    				}
 							}
 						}
 						if (!linhas[i+1].trim().startsWith('-'))	
