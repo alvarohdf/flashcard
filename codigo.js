@@ -188,7 +188,7 @@ function ConverterSetaParaCloze(texto)
     		if ( contarTxtNaString(texto, MarcadorBasic1) > 1 || contarTxtNaString(texto, MarcadorBasic2) > 1 || contarTxtNaString(texto, MarcadorCloze) > 1) 
 		{ // mais de um cloze
       			// achar o primeiro ponto para finalizar seta cloze
-      			while (fim < resultado.length && resultado[fim] !== ';') 
+      			while (fim < resultado.length && resultado[fim] !== '.') 
 			{
         				fim++;
 			}
