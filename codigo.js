@@ -312,10 +312,12 @@ function criarCartoes(textoOriginal)
 	// Mantém original
 	let markdownFinal = textoOriginal;
 
+	// Modificar texto será lido
 	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
   	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
-	
+	textoSeraLido = textoSeraLido.replace(/^\s*\n/gm, ''); // remover linhas em branco
+
   	linhas = textoSeraLido.split('\n');
 	linhas.push('', ''); // acrescenta duas em branco pra evitar erros pois eu faço leituras [i+1, i+2]
   	linhasOriginais = textoOriginal.split('\n');
