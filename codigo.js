@@ -309,14 +309,13 @@ function criarCartoes(textoOriginal)
 	textoOriginal = textoOriginal.replace(/\\#/g, '#');
 	let textoSeraLido = textoOriginal;
 
-	// Mantém original
+	// Markdown final
 	let markdownFinal = textoOriginal;
-
+	
 	// Modificar texto será lido
 	textoSeraLido = limpaMarkdownProAnki(textoSeraLido);
   	textoSeraLido = textoSeraLido.replaceAll(SinalCardJaFeito, '');
   	textoSeraLido = textoSeraLido.replaceAll('→', '➜');
-	textoSeraLido = textoSeraLido.replace(/^\s*\n/gm, ''); // remover linhas em branco
 
   	linhas = textoSeraLido.split('\n');
 	linhas.push('', ''); // acrescenta duas em branco pra evitar erros pois eu faço leituras [i+1, i+2]
@@ -366,7 +365,7 @@ function criarCartoes(textoOriginal)
   			// -- É LISTA
 			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) &&  !linhaSendoAnalisada.trim().endsWith('??'))
 			{
-				if (linhas[i+1].startsWith('-'))
+				if (linhas[i+1].startsWith('-') || (linhas[i+2].startsWith('-'))
 				{
 					contextoLista = linhaSendoAnalisada;
 					cardLista += contextoLista;
@@ -514,6 +513,7 @@ function criarCartoes(textoOriginal)
 	}
 	// FINAL
 	markdownFinal = markdownFinal.replaceAll('%%', '**');
+
 	if (SeparadorPerguntaResposta === ',')
 	{
 		cardsCSV = cardsCSV.replaceAll(',', '.');
