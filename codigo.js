@@ -98,7 +98,8 @@ function ProcuraCloze(texto) {
   if (
     texto.indexOf(MarcadorCloze) > -1 ||
     texto.indexOf(MarcadorBasic1) > -1 ||
-    texto.indexOf(MarcadorBasic2) > -1
+    texto.indexOf(MarcadorBasic2) > -1 ||
+    texto.indexOf(MarcadorSetaInversa) > -1
   ) {
     result = true;
   }
@@ -231,7 +232,7 @@ function ConverterSetaInversaParaCloze(texto)
   let esquerda = partes[0].trim();
   let direita = partes[1].trim();
 
-  return MarcadorCloze + esquerda + MarcadorCloze + direita;
+  return MarcadorCloze + esquerda + MarcadorCloze + ' ➜ ' + direita;
 }
 
 // ---------------- FORMATAR ----------------
@@ -245,7 +246,7 @@ function FormatarCards(contexto, cards)
 	if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
 	{
         	novoResult = ConverterSetaParaCloze(novoResult);
-    }
+    	}
 	if (novoResult.indexOf(MarcadorSetaInversa) > -1)
 	{
 		novoResult = ConverterSetaInversaParaCloze(novoResult);
