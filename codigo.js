@@ -5,7 +5,7 @@ const MarcadorCloze = '`';
 const MarcadorBasic2 = '⇒';
 const MarcadorBasic1 = '??';
 const MarcadorListaInteira = '<';
-const MarcadorBasicAtras = '<~';
+const MarcadorSetaInversa = '⇐';
 const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = 'XXX';
@@ -222,6 +222,18 @@ function ConverterSetaParaCloze(texto)
  	return resultado;
 }
 
+function ConverterSetaInversaParaCloze(texto) 
+{
+  if (!texto.includes(MarcadorSetaInversa)) return texto;
+
+  let partes = texto.split(MarcadorSetaInversa);
+
+  let esquerda = partes[0].trim();
+  let direita = partes[1].trim();
+
+  return MarcadorCloze + esquerda + MarcadorCloze + direita;
+}
+
 // ---------------- FORMATAR ----------------
 
 function FormatarCards(contexto, cards) 
@@ -233,7 +245,11 @@ function FormatarCards(contexto, cards)
 	if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
 	{
         	novoResult = ConverterSetaParaCloze(novoResult);
-    	}
+    }
+	if (novoResult.indexOf(MarcadorSetaInversa) > -1)
+	{
+		novoResult = ConverterSetaInversaParaCloze(novoResult);
+	}
 	if (novoResult.indexOf(MarcadorCloze) > -1) 
 	{
 		return GerarCardsClozeParaBasic(novoContexto, novoResult, MarcadorCloze);
