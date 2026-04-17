@@ -437,11 +437,7 @@ function criarCartoes(textoOriginal)
 				{
 					linhasTabela.push(linhas[i]);
 					i++;
-					j++;
-					if (linhas[i] === '') 
-					{
-      						i++; // linha em branco entre tabelas
-    					}	
+				//	j++;
   				}
 				// -- INICIAR CARDS TABELA --
   				for (j = 0; j < linhasTabela.length; j++) 
