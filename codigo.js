@@ -439,6 +439,7 @@ function criarCartoes(textoOriginal)
 					i++;
 				//	j++;
   				}
+				alert("ok");
 				// -- INICIAR CARDS TABELA --
   				for (j = 0; j < linhasTabela.length; j++) 
 				{
