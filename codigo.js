@@ -5,7 +5,7 @@ const MarcadorCloze = '`';
 const MarcadorBasic2 = '⇒';
 const MarcadorBasic1 = '??';
 const MarcadorListaInteira = '<';
-const MarcadorSetaInversa = '⇐';
+const MarcadorSetaInversa = '<<';
 const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = 'XXX';
@@ -103,6 +103,10 @@ function ProcuraCloze(texto) {
   ) {
     result = true;
   }
+if (texto.includes(SinalCardJaFeito)) // N incluir se ja feito
+{
+	result = false;
+}
 
   return result;
 }
