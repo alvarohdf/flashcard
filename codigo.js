@@ -1,5 +1,5 @@
 // CONSTANTES
-const SinalCardJaFeito = ' OK';
+const SinalCardJaFeito = ' OK!';
 const SeparadorPerguntaResposta = ';'; // >> = remnote
 const MarcadorCloze = '`';
 const MarcadorBasic2 = '⇒';
