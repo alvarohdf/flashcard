@@ -2,7 +2,7 @@
 const SinalCardJaFeito = ' OK!';
 const SeparadorPerguntaResposta = ';'; // >> = remnote
 const MarcadorCloze = '`';
-const MarcadorBasic2 = '⇒';
+const MarcadorBasic2 = '>>'; //⇒
 const MarcadorBasic1 = '??';
 const MarcadorListaInteira = '<';
 const MarcadorSetaInversa = '<<';
