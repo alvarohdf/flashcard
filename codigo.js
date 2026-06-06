@@ -11,6 +11,7 @@ const SetaLista = '↪';
 const TxtPergunta = 'XXX';
 const CaractereListaPraIncluirMesmoSemCard = '[]';
 const MultiplasSetasSinalFinal = ';';
+const CadaCloze1Card = '[2]';
 // ---------------- UTIL ----------------
 
 function limpaMarkdownProAnki(txt) {
@@ -20,6 +21,7 @@ function limpaMarkdownProAnki(txt) {
   result = result.replaceAll(MarcadorCloze, 'TEMPMARCADOROK');
 
   result = result.replaceAll('**', '');
+  result = result.replaceAll('::', '');
   result = result.replaceAll('==', '');
   result = result.replaceAll('[[', '');
   result = result.replaceAll(']]', '');
@@ -119,41 +121,73 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 	let inicioPos, fimPos, i, j;
 	let textoPergunta, textoResposta, resultado;
 	let tempTexto;
+
 	resultado = '';
-	// 1) Extrair clozes
-  	tempTexto = card;
+
+	// Extrair clozes
+	tempTexto = card;
 	inicioPos = tempTexto.indexOf(marcador);
-	while (inicioPos  !== -1) 
+
+	while (inicioPos !== -1)
 	{
 		fimPos = tempTexto.indexOf(marcador, inicioPos + marcador.length);
-    		if (fimPos === -1) break;
-		// equivalente ao Copy
-    		clozes.push(tempTexto.substring(inicioPos + marcador.length, fimPos));
-		// equivalente ao Delete
-		tempTexto = tempTexto.substring(0, inicioPos) + tempTexto.substring(fimPos + marcador.length);
+		if (fimPos === -1) break;
+
+		clozes.push(
+			tempTexto.substring(
+				inicioPos + marcador.length,
+				fimPos
+			)
+		);
+
+		tempTexto =
+			tempTexto.substring(0, inicioPos) +
+			tempTexto.substring(fimPos + marcador.length);
+
 		inicioPos = tempTexto.indexOf(marcador);
 	}
-  	for (i = 0; i < clozes.length; i++) 
-	{
-    		textoPergunta = card;
-		// A RESPOSTA É SÓ O CLOZE ATIVO
-		textoResposta = clozes[i];
-		for (j = 0; j < clozes.length; j++) 
-		{
-			let alvo = marcador + clozes[j] + marcador;
 
-      			if (i === j)
+	// Modo antigo: 1 card por cloze
+	if (card.includes(CadaCloze1Card))
+	{
+		for (i = 0; i < clozes.length; i++)
+		{
+			textoPergunta = card;
+			textoResposta = clozes[i];
+
+			for (j = 0; j < clozes.length; j++)
 			{
-				textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
-      			} 
-			else
-			{
-        				textoPergunta = textoPergunta.replace(alvo, '...');
+				let alvo = marcador + clozes[j] + marcador;
+
+				if (i === j)
+					textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
+				else
+					textoPergunta = textoPergunta.replace(alvo, '...');
 			}
-    		}
-		resultado +=contexto +textoPergunta +'tempSeparador' +textoResposta +'\n'; 
-		// equivalente ao sLineBreak
-  	}
+
+			resultado += contexto + textoPergunta +
+				'tempSeparador' +
+				textoResposta + '\n';
+		}
+	}
+	// Novo modo: todos os clozes em 1 único card
+	else
+	{
+		textoPergunta = card;
+
+		for (i = 0; i < clozes.length; i++)
+		{
+			let alvo = marcador + clozes[i] + marcador;
+			textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
+		}
+
+		textoResposta = clozes.join('<br>');
+
+		resultado += contexto + textoPergunta +
+			'tempSeparador' +
+			textoResposta + '\n';
+	}
+
 	return resultado;
 }
 
@@ -249,8 +283,8 @@ function FormatarCards(contexto, cards)
     	novoResult = limpaMarkdownProAnki(cards);
 	if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
 	{
-        	novoResult = ConverterSetaParaCloze(novoResult);
-    	}
+        	novoResult = ConverterSetaParaCloze(novoResult);	
+	}
 	if (novoResult.indexOf(MarcadorSetaInversa) > -1)
 	{
 		novoResult = ConverterSetaInversaParaCloze(novoResult);
