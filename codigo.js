@@ -210,7 +210,7 @@ function ConverterSetaParaCloze(texto)
     }
 
     // padronizar >> para ??
-    resultado = resultado.replaceAll(MarcadorBasic2, MarcadorBasic1);
+    resultado = resultado.replaceAll(MarcadorBasic2, '? ' + MarcadorBasic1);
 
     let p = resultado.indexOf(MarcadorBasic1);
 
@@ -542,10 +542,7 @@ function criarCartoes(textoOriginal)
 			// resetar contexto paragrafo
 			if ((contextoParagrafo !== '') && (!linhaSendoAnalisada.trim().startsWith('-')))
             {
-				if (linhaSendoAnalisada.endsWith('.')) 
-				{
-    					contextoParagrafo = '';
-  				}
+    				contextoParagrafo = '';
 			}
 			// -- OBTER CONTEXTOS
 			if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
