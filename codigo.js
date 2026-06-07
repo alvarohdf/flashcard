@@ -522,7 +522,7 @@ function criarCartoes(textoOriginal)
 				}
 				cardLista = '';
 				contadorCards++;
-				contextoParagrafo = '';
+		//		contextoParagrafo = '';
 				TemTabela = false;
 			}
 			// ---------- CARD ÚNICO com cloze provavelmente
@@ -544,7 +544,7 @@ function criarCartoes(textoOriginal)
 				}
 			}
 			// resetar contexto paragrafo
-			if (contextoParagrafo !== '') 
+			if (contextoParagrafo !== '') && (!linhaSendoAnalisada.startsWith('-'))
 			{
 				if (linhaSendoAnalisada.endsWith('.')) 
 				{
