@@ -540,8 +540,8 @@ function criarCartoes(textoOriginal)
 				}
 			}
 			// resetar contexto paragrafo
-			if (contextoParagrafo !== '') && (!linhaSendoAnalisada.trim().startsWith('-'))
-			{
+			if ((contextoParagrafo !== '') && (!linhaSendoAnalisada.trim().startsWith('-')))
+            {
 				if (linhaSendoAnalisada.endsWith('.')) 
 				{
     					contextoParagrafo = '';
