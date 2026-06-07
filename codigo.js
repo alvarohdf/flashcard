@@ -323,45 +323,26 @@ function FormatarCards(contexto, cards)
 
 }
 
-function ContarTabs(s) {
-  let result = 0;
-  let espacos = 0;
 
-  for (let i = 0; i < s.length; i++) {
-    if (s[i] === '\t') {
-      result++;
-    } else if (s[i] === ' ') {
-      espacos++;
-    } else {
-      break;
-    }
-  }
+function TabsLista(linha)
+{
+	let espacos = 0;
 
-  // equivalente ao "div 3"
-  result = result + Math.floor(espacos / 3);
+	for (let i = 0; i < linha.length; i++)
+	{
+		if (linha[i] === ' ')
+			espacos++;
+		else if (linha[i] === '\t')
+			espacos += 3;
+		else
+			break;
+	}
 
-  return result;
-}
+	let nivel = Math.floor(espacos / 3) + 1;
 
+	let texto = linha.trimStart().replace(/^-\s*/, '');
 
-function TabsLista(linha) {
-  let result = '';
-
-  // Ignora se não for item de lista
-  if (!linha.trimStart().startsWith('-')) {
-    return SetaLista + ' ' + linha;
-  }
-
-  // nível = tabs + 1
-  let nivelLinha = ContarTabs(linha) + 1;
-
-  // texto sem "-"
-  let texto = linha.trim().replace('-', '').trim();
-
-  // equivalente ao DupeString
-  result = SetaLista.repeat(nivelLinha) + ' ' + texto;
-
-  return result;
+	return SetaLista.repeat(nivel) + ' ' + texto;
 }
 
 // ---------------- PRINCIPAL ----------------
@@ -386,6 +367,7 @@ function criarCartoes(textoOriginal)
   let cardLista = '';
   let tabelaMarkdownFinal = '';
   let TemTabela = false;
+  let TabelaLinhaHeader = '';
 
   let cardsCSV = '';
 
@@ -483,25 +465,39 @@ function criarCartoes(textoOriginal)
 				if (linhaSendoAnalisada.startsWith('-')) 
 				{
 					linhaSendoAnalisada = TabsLista(linhaSendoAnalisada);
-				}				
+				}		
 				cardLista += linhaSendoAnalisada;
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
 				if (!linhaSendoAnalisada.trim().endsWith('.')) // tem mais = PARAGRAFÃO, LISTA.
 				{ // Não pode ser ; pois se eu quiser colocar um paciente deitado: - próxima linha?				
-					while (i < linhas.length)
+					while (i + 1 < linhas.length)
 					{
-						i++;
+    						i++;		
 						linhaSendoAnalisada = linhas[i];
-						if (linhaSendoAnalisada.trim().startsWith('|')) 
+						
+						if (linhaSendoAnalisada.trim().startsWith('|'))
 						{
+							if (TemTabela == false)
+							{
+								TabelaLinhaHeader = linhaSendoAnalisada;
+								linhaSendoAnalisada = '';
+							}
+							else
+							{
+								if (linhaSendoAnalisada.includes('| - |'))
+								{
+									linhaSendoAnalisada = '';
+								}
+								else
+								{
+									linhaSendoAnalisada = TabelaFormatoTexto(TabelaLinhaHeader, linhaSendoAnalisada);
+								}
+							}
 							TemTabela = true;
 						}
-						if (linhaSendoAnalisada.startsWith('-')) 
-						{
-							linhaSendoAnalisada = TabsLista(linhaSendoAnalisada);
-						}
+
 						if (linhaSendoAnalisada.trim() !== '') 
 						{
     							cardLista += TabsLista(linhaSendoAnalisada) + ' ';
@@ -510,9 +506,12 @@ function criarCartoes(textoOriginal)
    						{
 							break;
   						}
+						if (TemTabela &&(i + 1 >= linhas.length ||linhas[i + 1].trim() === ''))
+						{
+							break;
+						}
 					}
 				}
-//colocar função tabela aqui
 				if (contextoParagrafo !== '') 
 				{
 					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
