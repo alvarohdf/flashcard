@@ -462,10 +462,6 @@ function criarCartoes(textoOriginal)
 			// -- CARD NORMAL
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
-				if (linhaSendoAnalisada.startsWith('-')) 
-				{
-					linhaSendoAnalisada = TabsLista(linhaSendoAnalisada);
-				}		
 				cardLista += linhaSendoAnalisada;
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
