@@ -193,72 +193,99 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 // ---------------- SETA → CLOZE ----------------
 
-function ConverterSetaParaCloze(texto) 
+function ConverterSetaParaCloze(texto)
 {
-	let resultado = texto;
-  	let marcador = MarcadorBasic1;
+    let resultado = texto;
 
-	// dar espaço antes do marcador ??
-	if (!(texto.indexOf(' ' + MarcadorBasic1) > -1)) 
-	{
-        	texto = texto.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
-      	}
-	// dar espaço antes do marcador ⇒
-      	if (!(texto.indexOf(' ' + MarcadorBasic2) > -1)) 
-	{
-		texto = texto.replace(MarcadorBasic2, ' ' + MarcadorBasic2);
-      	}
+    // dar espaço antes do marcador ??
+    if (!(resultado.indexOf(' ' + MarcadorBasic1) > -1))
+    {
+        resultado = resultado.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
+    }
 
-  	if (texto.includes(MarcadorBasic2)) 
-	{
-    		marcador = MarcadorBasic2;
-  	}
+    // dar espaço antes do marcador >>
+    if (!(resultado.indexOf(' ' + MarcadorBasic2) > -1))
+    {
+        resultado = resultado.replace(MarcadorBasic2, ' ' + MarcadorBasic2);
+    }
 
-  	let p = resultado.indexOf(marcador);
+    // padronizar >> para ??
+    resultado = resultado.replaceAll(MarcadorBasic2, MarcadorBasic1);
 
-  	while (p !== -1)
-	{
-	    	// início do conteúdo após marcador
-    		let fim = p + marcador.length;
-		// pula espaços
-		while (fim < resultado.length && resultado[fim] === ' ') 
-		{
-			fim++;
-    		}
-    		if ( contarTxtNaString(texto, MarcadorBasic1) > 1 || contarTxtNaString(texto, MarcadorBasic2) > 1 || contarTxtNaString(texto, MarcadorCloze) > 1) 
-		{ // mais de um cloze
-      			// achar o primeiro ponto para finalizar seta cloze
-      			while (fim < resultado.length && resultado[fim] !== MultiplasSetasSinalFinal)
-			{
-        				fim++;
-			}
-      		}
-		else 
-		{ // um cloze só
-      			// até fim da linha
-      			while (fim < resultado.length && resultado[fim] !== '\n' && resultado[fim] !== '\r') 
-			{
-        				fim++;
-      			}
-    		}
-		// captura conteúdo
-    		let conteudo = resultado.substring(p + marcador.length, fim).trim();
-		// delimitador
-		let delim = '';
-		if (fim < resultado.length && (resultado[fim] === ';' || resultado[fim] === '.')) 
-		{
-      			delim = resultado[fim];
-    		}
-    		// substituição (equivalente ao Copy do Pascal)
-    		resultado = resultado.substring(0, p) +  MarcadorCloze + conteudo + MarcadorCloze + delim + resultado.substring(fim + 1);
-		// próximo marcador (equivalente ao PosEx)
-    		p = resultado.indexOf(marcador, p + 1);
- 	}
-	if (texto.indexOf(MarcadorBasic1) > -1 || texto.indexOf(MarcadorBasic2) > -1) // antes era só se fosse com ?? 
-	{
-       		resultado = resultado.replace(MarcadorCloze, '?' + ' ' + MarcadorCloze);
-	} 
- 	return resultado;
+    let p = resultado.indexOf(MarcadorBasic1);
+
+    while (p !== -1)
+    {
+        let fim = p + MarcadorBasic1.length;
+
+        while (fim < resultado.length && resultado[fim] === ' ')
+        {
+            fim++;
+        }
+
+        if (
+            contarTxtNaString(resultado, MarcadorBasic1) > 1 ||
+            contarTxtNaString(resultado, MarcadorCloze) > 1
+        )
+        {
+            while (
+                fim < resultado.length &&
+                resultado[fim] !== MultiplasSetasSinalFinal
+            )
+            {
+                fim++;
+            }
+        }
+        else
+        {
+            while (
+                fim < resultado.length &&
+                resultado[fim] !== '\n' &&
+                resultado[fim] !== '\r'
+            )
+            {
+                fim++;
+            }
+        }
+
+        let conteudo = resultado.substring(
+            p + MarcadorBasic1.length,
+            fim
+        ).trim();
+
+        let delim = '';
+
+        if (
+            fim < resultado.length &&
+            (resultado[fim] === ';' || resultado[fim] === '.')
+        )
+        {
+            delim = resultado[fim];
+        }
+
+        resultado =
+            resultado.substring(0, p) +
+            MarcadorCloze +
+            conteudo +
+            MarcadorCloze +
+            delim +
+            resultado.substring(fim + 1);
+
+        p = resultado.indexOf(MarcadorBasic1, p + 1);
+    }
+
+    if (
+        resultado.indexOf(MarcadorBasic1) > -1 ||
+        texto.indexOf(MarcadorBasic2) > -1
+    )
+    {
+        resultado = resultado.replace(
+            MarcadorCloze,
+            '? ' + MarcadorCloze
+        );
+    }
+
+    return resultado;
 }
 
 function ConverterSetaInversaParaCloze(texto) 
@@ -358,6 +385,7 @@ function criarCartoes(textoOriginal)
   let contexto = '';
   let cardLista = '';
   let tabelaMarkdownFinal = '';
+  let TemTabela = false;
 
   let cardsCSV = '';
 
@@ -417,52 +445,8 @@ function criarCartoes(textoOriginal)
 		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
-  			// -- É LISTA
-			if ((linhaSendoAnalisada.trim().endsWith(':') || linhaSendoAnalisada.trim().endsWith('?')) &&  !linhaSendoAnalisada.trim().endsWith('??'))
-			{
-				if (linhas[i+1].startsWith('-') || linhas[i+2].startsWith('-')) 
-				{
-					contextoLista = linhaSendoAnalisada;
-					cardLista += contextoLista;
-					i++;
-					linhaSendoAnalisada = linhas[i];
-					while (i < linhas.length)
-					{
-						if (linhaSendoAnalisada.trim().startsWith('-'))
-						{ // É ITEM LISTA
-							if (ProcuraCloze(linhaSendoAnalisada) === true || linhaSendoAnalisada.includes(CaractereListaPraIncluirMesmoSemCard) || linhaSendoAnalisada.trim().endsWith(':')) 
-							{
-								if (!linhasOriginais[i - 1].includes(SinalCardJaFeito))
-								{
-				    					cardLista += ' ' + TabsLista(ConverterSetaParaCloze(linhaSendoAnalisada));
-  								}
-							}
-							if (linhaSendoAnalisada.trim().endsWith('.'))
-							{
-								// TERMINOU PARTE DA LISTA = .
-								if (ProcuraCloze(cardLista) === true) 
-								{
-									cardsCSV += FormatarCards(contexto, cardLista);
-									markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
-									contadorCards++;
-									cardLista = '';
-									cardLista += contextoLista;
-			    				}
-							}
-						}
-						if (!linhas[i+1].trim().startsWith('-'))	
-						{ // TERMINOU TODA A LISTA
-							break;
-						}
-						// CONTINUAR, TEM MAIS LISTA.
-						i++;
-						linhaSendoAnalisada = linhas[i];
-					}
-				}
-			}
-			//-- FIM LISTA
 			// -- É TABELA
-			else if (linhaSendoAnalisada.trim().startsWith('|')) 
+			if (linhaSendoAnalisada.trim().startsWith('|')) 
 			{
 				linhasTabela = [];
   				j = 0;
@@ -493,19 +477,31 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// -- CARD COM SETA, SEM SER LISTA
+			// -- CARD NORMAL
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
+				if (linhaSendoAnalisada.startsWith('-')) 
+				{
+					linhaSendoAnalisada = TabsLista(linhaSendoAnalisada);
+				}				
 				cardLista += linhaSendoAnalisada;
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
-				if (!linhaSendoAnalisada.trim().endsWith('.')) // tem mais = PARAGRAFÃO.
+				if (!linhaSendoAnalisada.trim().endsWith('.')) // tem mais = PARAGRAFÃO, LISTA.
 				{ // Não pode ser ; pois se eu quiser colocar um paciente deitado: - próxima linha?				
 					while (i < linhas.length)
 					{
 						i++;
 						linhaSendoAnalisada = linhas[i];
+						if (linhaSendoAnalisada.trim().startsWith('|')) 
+						{
+							TemTabela = true;
+						}
+						if (linhaSendoAnalisada.startsWith('-')) 
+						{
+							linhaSendoAnalisada = TabsLista(linhaSendoAnalisada);
+						}
 						if (linhaSendoAnalisada.trim() !== '') 
 						{
     							cardLista += TabsLista(linhaSendoAnalisada) + ' ';
@@ -516,6 +512,7 @@ function criarCartoes(textoOriginal)
   						}
 					}
 				}
+//colocar função tabela aqui
 				if (contextoParagrafo !== '') 
 				{
 					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
@@ -527,6 +524,7 @@ function criarCartoes(textoOriginal)
 				cardLista = '';
 				contadorCards++;
 				contextoParagrafo = '';
+				TemTabela = false;
 			}
 			// ---------- CARD ÚNICO com cloze provavelmente
 			else 
