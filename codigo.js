@@ -223,27 +223,7 @@ function ConverterSetaParaCloze(texto)
             fim++;
         }
 
-		let inicioLinha = resultado.lastIndexOf('\n', p);
-
-	if (inicioLinha === -1)
-	{
-   		 inicioLinha = 0;
-	}
-	else
-	{
-  		  inicioLinha++;
-	}
-
-	let fimLinha = resultado.indexOf('\n', p);
-
-	if (fimLinha === -1)
-	{
-  	  fimLinha = resultado.length;
-	}
-
-	let linhaAtual = resultado.substring(inicioLinha, fimLinha);
-
-		let qtdeMarcadoresLinha = contarTxtNaString(linhaAtual, MarcadorBasic1) + contarTxtNaString(linhaAtual, MarcadorCloze);
+	let qtdeMarcadoresLinha = contarTxtNaString(resultado, MarcadorBasic1) + contarTxtNaString(resultado, MarcadorCloze);
 		
 // múltiplos cozes
         if (qtdeMarcadoresLinha > 1)
@@ -482,7 +462,7 @@ function criarCartoes(textoOriginal)
 			// -- CARD NORMAL
 			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
 			{
-				cardLista += linhaSendoAnalisada;
+				cardLista += TabsLista(linhaSendoAnalisada);
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
