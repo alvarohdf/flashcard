@@ -210,7 +210,7 @@ function ConverterSetaParaCloze(texto)
     }
 
     // padronizar >> para ??
-    resultado = resultado.replaceAll(MarcadorBasic2, '? ' + MarcadorBasic1);
+    resultado = resultado.replaceAll(MarcadorBasic2, MarcadorBasic1);
 
     let p = resultado.indexOf(MarcadorBasic1);
 
@@ -223,10 +223,30 @@ function ConverterSetaParaCloze(texto)
             fim++;
         }
 
-        if (
-            contarTxtNaString(resultado, MarcadorBasic1) > 1 ||
-            contarTxtNaString(resultado, MarcadorCloze) > 1
-        )
+		let inicioLinha = resultado.lastIndexOf('\n', p);
+
+	if (inicioLinha === -1)
+	{
+   		 inicioLinha = 0;
+	}
+	else
+	{
+  		  inicioLinha++;
+	}
+
+	let fimLinha = resultado.indexOf('\n', p);
+
+	if (fimLinha === -1)
+	{
+  	  fimLinha = resultado.length;
+	}
+
+	let linhaAtual = resultado.substring(inicioLinha, fimLinha);
+
+		let qtdeMarcadoresLinha = contarTxtNaString(linhaAtual, MarcadorBasic1) + contarTxtNaString(linhaAtual, MarcadorCloze);
+		
+// múltiplos cozes
+        if (qtdeMarcadoresLinha > 1)
         {
             while (
                 fim < resultado.length &&
@@ -262,10 +282,10 @@ function ConverterSetaParaCloze(texto)
         {
             delim = resultado[fim];
         }
-
-        resultado =
+        
+		resultado =
             resultado.substring(0, p) +
-            MarcadorCloze +
+         MarcadorCloze +
             conteudo +
             MarcadorCloze +
             delim +
