@@ -31,7 +31,7 @@ function limpaMarkdownProAnki(txt) {
   result = result.replaceAll('TEMPMARCADOROK', MarcadorCloze);
 
   // remover TAB (\t = #9)
-  result = result.replaceAll('\t', '');
+ // result = result.replaceAll('\t', '');
 
   return result;
 }
@@ -71,15 +71,13 @@ function TabelaFormatoTexto(cabecalho, entrada) {
 
       resultado =
         resultado +
-        ' - ' + partesCab[j].trim() + ': ' + celula;
+        ' - ' + partesCab[j].trim() + ': ' + celula + '\n';
     }
 
+    resultado = resultado.trim();
     resultado = resultado + '\n'; // sLineBreak
   }
-
-  resultado = resultado.trim();
   resultado = limpaMarkdownProAnki(resultado);
-
   return resultado;
 }
 
@@ -200,17 +198,27 @@ function ConverterSetaParaCloze(texto)
     // dar espaço antes do marcador ??
     if (!(resultado.indexOf(' ' + MarcadorBasic1) > -1))
     {
-        resultado = resultado.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
+        resultado = resultado.replace(
+            MarcadorBasic1,
+            ' ' + MarcadorBasic1
+        );
     }
 
     // dar espaço antes do marcador >>
     if (!(resultado.indexOf(' ' + MarcadorBasic2) > -1))
     {
-        resultado = resultado.replace(MarcadorBasic2, ' ' + MarcadorBasic2);
+        resultado = resultado.replace(
+            MarcadorBasic2,
+            ' ' + MarcadorBasic2
+        );
     }
 
-    // padronizar >> para ??
-    resultado = resultado.replaceAll(MarcadorBasic2, MarcadorBasic1);
+    // padronizar >>
+    resultado = resultado.replaceAll(
+        MarcadorBasic2,
+        MarcadorBasic1
+    );
+
 
     let p = resultado.indexOf(MarcadorBasic1);
 
@@ -218,14 +226,48 @@ function ConverterSetaParaCloze(texto)
     {
         let fim = p + MarcadorBasic1.length;
 
-        while (fim < resultado.length && resultado[fim] === ' ')
+        // pular espaços após ??
+        while (
+            fim < resultado.length &&
+            resultado[fim] === ' '
+        )
         {
             fim++;
         }
 
-	let qtdeMarcadoresLinha = contarTxtNaString(resultado, MarcadorBasic1) + contarTxtNaString(resultado, MarcadorCloze);
-		
-// múltiplos cozes
+        // localizar início e fim da linha atual
+        let inicioLinha = resultado.lastIndexOf('\n', p);
+
+        if (inicioLinha === -1)
+        {
+            inicioLinha = 0;
+        }
+        else
+        {
+            inicioLinha++;
+        }
+
+        let fimLinha = resultado.indexOf('\n', p);
+
+        if (fimLinha === -1)
+        {
+            fimLinha = resultado.length;
+        }
+
+        let textoLinha = resultado.substring(
+            inicioLinha,
+            fimLinha
+        );
+
+        // contar marcadores SOMENTE na linha atual
+        let qtdeMarcadoresLinha =
+            contarTxtNaString(
+                textoLinha,
+                MarcadorBasic1
+            );
+
+        // múltiplos clozes na mesma linha:
+        // usar delimitador manual
         if (qtdeMarcadoresLinha > 1)
         {
             while (
@@ -238,11 +280,12 @@ function ConverterSetaParaCloze(texto)
         }
         else
         {
+            // cloze único: vai até o fim da linha
             while (
                 fim < resultado.length &&
                 resultado[fim] !== '\n' &&
                 resultado[fim] !== '\r'
-            )
+            ) // \n windows \r mac antigo
             {
                 fim++;
             }
@@ -257,34 +300,34 @@ function ConverterSetaParaCloze(texto)
 
         if (
             fim < resultado.length &&
-            (resultado[fim] === ';' || resultado[fim] === '.')
+            (
+                resultado[fim] === ';' ||
+                resultado[fim] === '.'
+            )
         )
         {
             delim = resultado[fim];
         }
-        
-		resultado =
+
+        resultado =
             resultado.substring(0, p) +
-         MarcadorCloze +
+            MarcadorCloze +
             conteudo +
             MarcadorCloze +
             delim +
             resultado.substring(fim + 1);
 
-        p = resultado.indexOf(MarcadorBasic1, p + 1);
-    }
-
-    if (
-        resultado.indexOf(MarcadorBasic1) > -1 ||
-        texto.indexOf(MarcadorBasic2) > -1
-    )
-    {
-        resultado = resultado.replace(
-            MarcadorCloze,
-            '? ' + MarcadorCloze
+        p = resultado.indexOf(
+            MarcadorBasic1,
+            p + 1
         );
     }
 
+      resultado = resultado.replace(
+            MarcadorCloze,
+            '? ' + MarcadorCloze
+        );
+  
     return resultado;
 }
 
@@ -460,9 +503,9 @@ function criarCartoes(textoOriginal)
 				}
 			}
 			// -- CARD NORMAL
-			else if (linhaSendoAnalisada.indexOf(MarcadorBasic1) > -1 || linhaSendoAnalisada.indexOf(MarcadorBasic2) > -1)
+			else if (ProcuraCloze(linhaSendoAnalisada) == true)
 			{
-				cardLista += TabsLista(linhaSendoAnalisada);
+				cardLista += linhaSendoAnalisada;
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -522,23 +565,24 @@ function criarCartoes(textoOriginal)
 				TemTabela = false;
 			}
 			// ---------- CARD ÚNICO com cloze provavelmente
-			else 
-			{
-				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
-				{
-					// APLICAR CONTEXTO PARÁGRAFO
-					if (contextoParagrafo !== '') 
-					{
-						cardsCSV += FormatarCards(contexto + contextoParagrafo, ConverterSetaParaCloze(linhaSendoAnalisada));
-					} 
-					else 
-					{
-						cardsCSV += FormatarCards(contexto, ConverterSetaParaCloze(linhaSendoAnalisada));
-					}
-					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
-					contadorCards++;
-				}
-			}
+	//		else 
+	//		{
+
+//				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
+//				{
+//					// APLICAR CONTEXTO PARÁGRAFO
+//					if (contextoParagrafo !== '') 
+//					{
+//						cardsCSV += FormatarCards(contexto + contextoParagrafo, ConverterSetaParaCloze(linhaSendoAnalisada));
+//					} 
+//					else 
+//					{
+//						cardsCSV += FormatarCards(contexto, ConverterSetaParaCloze(linhaSendoAnalisada));
+//					}
+//					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+//					contadorCards++;
+//				}
+//			}
 			// resetar contexto paragrafo
 			if ((contextoParagrafo !== '') && (!linhaSendoAnalisada.trim().startsWith('-')))
             {
