@@ -505,7 +505,7 @@ function criarCartoes(textoOriginal)
 			// -- CARD NORMAL
 			else if (ProcuraCloze(linhaSendoAnalisada) == true)
 			{
-				cardLista += linhaSendoAnalisada;
+				cardLista += linhaSendoAnalisada + '\n';
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -539,7 +539,7 @@ function criarCartoes(textoOriginal)
 
 						if (linhaSendoAnalisada.trim() !== '') 
 						{
-    							cardLista += TabsLista(linhaSendoAnalisada) + ' ';
+    							cardLista += TabsLista(linhaSendoAnalisada) + '\n';
 	 					}
 						if (linhaSendoAnalisada.trim().endsWith('.'))
    						{
@@ -551,6 +551,7 @@ function criarCartoes(textoOriginal)
 						}
 					}
 				}
+				alert(JSON.stringify(cardLista));
 				if (contextoParagrafo !== '') 
 				{
 					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
