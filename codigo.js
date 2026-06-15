@@ -505,7 +505,7 @@ function criarCartoes(textoOriginal)
 			// -- CARD NORMAL
 			else if (ProcuraCloze(linhaSendoAnalisada) == true)
 			{
-				cardLista += linhaSendoAnalisada + '\n';
+				cardLista += TabsLista(linhaSendoAnalisada) + '\n';
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -551,7 +551,6 @@ function criarCartoes(textoOriginal)
 						}
 					}
 				}
-				alert(JSON.stringify(cardLista));
 				if (contextoParagrafo !== '') 
 				{
 					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
