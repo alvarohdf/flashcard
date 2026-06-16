@@ -121,6 +121,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 	let tempTexto;
 
 	resultado = '';
+	card = card.replace(/[\r\n]/g, '');
 
 	// Extrair clozes
 	tempTexto = card;
@@ -163,7 +164,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 					textoPergunta = textoPergunta.replace(alvo, '...');
 			}
 
-			resultado += contexto + textoPergunta.trim() +
+			resultado += contexto + textoPergunta +
 				'tempSeparador' +
 				textoResposta + '\n';
 		}
@@ -181,7 +182,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 		textoResposta = clozes.join('<br>');
 
-		resultado += contexto + textoPergunta.trim() +
+		resultado += contexto + textoPergunta +
 			'tempSeparador' +
 			textoResposta + '\n';
 	}
@@ -311,10 +312,8 @@ function ConverterSetaParaCloze(texto)
         resultado =
             resultado.substring(0, p) +
             MarcadorCloze +
-            conteudo +
-            MarcadorCloze +
-            delim +
-            resultado.substring(fim + 1);
+            resultado.substring(fim + 1).trim() +
+            MarcadorCloze;
 
         p = resultado.indexOf(
             MarcadorBasic1,
@@ -326,8 +325,8 @@ function ConverterSetaParaCloze(texto)
             MarcadorCloze,
             '? ' + MarcadorCloze
         );
-  
     return resultado;
+
 }
 
 function ConverterSetaInversaParaCloze(texto) 
@@ -504,7 +503,8 @@ function criarCartoes(textoOriginal)
 			// -- CARD NORMAL
 			else if (ProcuraCloze(linhaSendoAnalisada) == true)
 			{
-				cardLista += TabsLista(linhaSendoAnalisada) + '\n';
+				cardLista += TabsLista(linhaSendoAnalisada);
+				cardLista += '\n';
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -538,7 +538,8 @@ function criarCartoes(textoOriginal)
 
 						if (linhaSendoAnalisada.trim() !== '') 
 						{
-    							cardLista += TabsLista(linhaSendoAnalisada) + '\n';
+    							cardLista += TabsLista(linhaSendoAnalisada);
+							cardLista += '\n';
 	 					}
 						if (linhaSendoAnalisada.trim().endsWith('.'))
    						{
