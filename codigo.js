@@ -163,7 +163,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 					textoPergunta = textoPergunta.replace(alvo, '...');
 			}
 
-			resultado += contexto + textoPergunta +
+			resultado += contexto + textoPergunta.trim() +
 				'tempSeparador' +
 				textoResposta + '\n';
 		}
@@ -181,11 +181,10 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 		textoResposta = clozes.join('<br>');
 
-		resultado += contexto + textoPergunta +
+		resultado += contexto + textoPergunta.trim() +
 			'tempSeparador' +
 			textoResposta + '\n';
 	}
-
 	return resultado;
 }
 
