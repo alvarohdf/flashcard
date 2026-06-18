@@ -195,47 +195,28 @@ function ConverterSetaParaCloze(texto)
 {
     let resultado = texto;
 
-    // dar espaço antes do marcador ??
-    if (!(resultado.indexOf(' ' + MarcadorBasic1) > -1))
-    {
-        resultado = resultado.replace(
-            MarcadorBasic1,
-            ' ' + MarcadorBasic1
-        );
-    }
+    // garantir espaço antes dos marcadores
+    resultado = resultado.replaceAll(
+        MarcadorBasic1,
+        ' ' + MarcadorBasic1
+    );
 
-    // dar espaço antes do marcador >>
-    if (!(resultado.indexOf(' ' + MarcadorBasic2) > -1))
-    {
-        resultado = resultado.replace(
-            MarcadorBasic2,
-            ' ' + MarcadorBasic2
-        );
-    }
+    resultado = resultado.replaceAll(
+        MarcadorBasic2,
+        ' ' + MarcadorBasic2
+    );
 
-    // padronizar >>
+    // padronizar marcador secundário
     resultado = resultado.replaceAll(
         MarcadorBasic2,
         MarcadorBasic1
     );
 
-
     let p = resultado.indexOf(MarcadorBasic1);
 
     while (p !== -1)
     {
-        let fim = p + MarcadorBasic1.length;
-
-        // pular espaços após ??
-        while (
-            fim < resultado.length &&
-            resultado[fim] === ' '
-        )
-        {
-            fim++;
-        }
-
-        // localizar início e fim da linha atual
+        // início da linha
         let inicioLinha = resultado.lastIndexOf('\n', p);
 
         if (inicioLinha === -1)
@@ -247,6 +228,7 @@ function ConverterSetaParaCloze(texto)
             inicioLinha++;
         }
 
+        // fim da linha
         let fimLinha = resultado.indexOf('\n', p);
 
         if (fimLinha === -1)
@@ -254,79 +236,81 @@ function ConverterSetaParaCloze(texto)
             fimLinha = resultado.length;
         }
 
+        // quantidade de marcadores na linha
         let textoLinha = resultado.substring(
             inicioLinha,
             fimLinha
         );
 
-        // contar marcadores SOMENTE na linha atual
-        let qtdeMarcadoresLinha =
-            contarTxtNaString(
-                textoLinha,
-                MarcadorBasic1
-            );
+        let qtdeMarcadoresLinha = contarTxtNaString(
+            textoLinha,
+            MarcadorBasic1
+        );
 
-        // múltiplos clozes na mesma linha:
-        // usar delimitador manual
+        // início do conteúdo
+        let inicioConteudo = p + MarcadorBasic1.length;
+
+        while (
+            inicioConteudo < resultado.length &&
+            /\s/.test(resultado[inicioConteudo])
+        )
+        {
+            inicioConteudo++;
+        }
+
+        let fimConteudo;
+
         if (qtdeMarcadoresLinha > 1)
         {
-            while (
-                fim < resultado.length &&
-                resultado[fim] !== MultiplasSetasSinalFinal
+            fimConteudo = resultado.indexOf(
+                MultiplasSetasSinalFinal,
+                inicioConteudo
+            );
+
+            if (
+                fimConteudo === -1 ||
+                fimConteudo > fimLinha
             )
             {
-                fim++;
+                fimConteudo = fimLinha;
             }
         }
         else
         {
-            // cloze único: vai até o fim da linha
-            while (
-                fim < resultado.length &&
-                resultado[fim] !== '\n' &&
-                resultado[fim] !== '\r'
-            ) // \n windows \r mac antigo
-            {
-                fim++;
-            }
+            fimConteudo = fimLinha;
         }
 
         let conteudo = resultado.substring(
-            p + MarcadorBasic1.length,
-            fim
+            inicioConteudo,
+            fimConteudo
         ).trim();
 
         let delim = '';
 
         if (
-            fim < resultado.length &&
-            (
-                resultado[fim] === ';' ||
-                resultado[fim] === '.'
-            )
+            conteudo.endsWith(';') ||
+            conteudo.endsWith('.')
         )
         {
-            delim = resultado[fim];
+            delim = conteudo.slice(-1);
+            conteudo = conteudo.slice(0, -1).trim();
         }
 
         resultado =
             resultado.substring(0, p) +
             MarcadorCloze +
-            resultado.substring(fim + 1).trim() +
-            MarcadorCloze;
+            conteudo +
+            MarcadorCloze +
+            delim +
+            resultado.substring(fimConteudo);
 
         p = resultado.indexOf(
             MarcadorBasic1,
-            p + 1
+            p + MarcadorCloze.length + conteudo.length
         );
     }
 
-      resultado = resultado.replace(
-            MarcadorCloze,
-            '? ' + MarcadorCloze
-        );
     return resultado;
-
 }
 
 function ConverterSetaInversaParaCloze(texto) 
