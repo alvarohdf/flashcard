@@ -39,8 +39,13 @@ document.getElementById("btnGerar").addEventListener("click", function() {
   const texto = document.getElementById("entrada").value;
 
   const resultado = criarCartoes(texto);
+  const saida = document.getElementById("saida");
 
-  document.getElementById("saida").value = resultado.cards;
+  if (saida.value !== '') {
+    saida.value += '\n';
+  }
+
+  saida.value += resultado.cards;
   document.getElementById("markdownFinal").value = resultado.markdown;
   document.getElementById("contadorCards").innerText = "Caracteres a mais esperado: " + resultado.contagem;
 
