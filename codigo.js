@@ -126,7 +126,6 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 	// Extrair clozes
 	tempTexto = card;
 	inicioPos = tempTexto.indexOf(marcador);
-
 	while (inicioPos !== -1)
 	{
 		fimPos = tempTexto.indexOf(marcador, inicioPos + marcador.length);
@@ -196,15 +195,15 @@ function ConverterSetaParaCloze(texto)
     let resultado = texto;
 
     // garantir espaço antes dos marcadores
-    resultado = resultado.replaceAll(
-        MarcadorBasic1,
-        ' ' + MarcadorBasic1
-    );
+//    resultado = resultado.replaceAll(
+//        MarcadorBasic1,
+ //       ' ' + MarcadorBasic1
+//    );
 
-    resultado = resultado.replaceAll(
-        MarcadorBasic2,
-        ' ' + MarcadorBasic2
-    );
+//    resultado = resultado.replaceAll(
+     //   MarcadorBasic2,
+    //    ' ' + MarcadorBasic2
+   // );
 
     // padronizar marcador secundário
     resultado = resultado.replaceAll(
@@ -216,68 +215,100 @@ function ConverterSetaParaCloze(texto)
 
     while (p !== -1)
     {
-        // início da linha
+        // início da linha atual
         let inicioLinha = resultado.lastIndexOf('\n', p);
 
         if (inicioLinha === -1)
-        {
             inicioLinha = 0;
-        }
         else
-        {
             inicioLinha++;
-        }
 
-        // fim da linha
+        // fim da linha atual
         let fimLinha = resultado.indexOf('\n', p);
 
         if (fimLinha === -1)
-        {
             fimLinha = resultado.length;
-        }
 
-        // quantidade de marcadores na linha
-        let textoLinha = resultado.substring(
-            inicioLinha,
-            fimLinha
-        );
+        let textoLinha = resultado.substring(inicioLinha, fimLinha);
 
         let qtdeMarcadoresLinha = contarTxtNaString(
             textoLinha,
             MarcadorBasic1
         );
 
-        // início do conteúdo
-        let inicioConteudo = p + MarcadorBasic1.length;
+        // existe conteúdo após o ??
+        let restoLinha = resultado.substring(
+            p + MarcadorBasic1.length,
+            fimLinha
+        );
 
-        while (
-            inicioConteudo < resultado.length &&
-            /\s/.test(resultado[inicioConteudo])
-        )
-        {
-            inicioConteudo++;
-        }
+        let marcadorNoFimDaLinha = restoLinha.trim() === '';
 
+        let inicioConteudo;
         let fimConteudo;
 
-        if (qtdeMarcadoresLinha > 1)
+        // CASO ESPECIAL:
+        // Pergunta termina com ?? e a resposta está nas linhas seguintes
+        if (marcadorNoFimDaLinha)
         {
-            fimConteudo = resultado.indexOf(
-                MultiplasSetasSinalFinal,
-                inicioConteudo
-            );
+            inicioConteudo = fimLinha + 1;
 
-            if (
-                fimConteudo === -1 ||
-                fimConteudo > fimLinha
-            )
+            // procura o fim do bloco (última linha não vazia)
+            fimConteudo = inicioConteudo;
+
+            while (fimConteudo < resultado.length)
             {
-                fimConteudo = fimLinha;
+                let proxQuebra = resultado.indexOf('\n', fimConteudo);
+
+                if (proxQuebra === -1)
+                {
+                    fimConteudo = resultado.length;
+                    break;
+                }
+
+                let linha = resultado.substring(
+                    fimConteudo,
+                    proxQuebra
+                );
+
+                if (linha.trim() === '')
+                    break;
+
+                fimConteudo = proxQuebra + 1;
             }
         }
         else
         {
-            fimConteudo = fimLinha;
+            // comportamento original
+            inicioConteudo = p + MarcadorBasic1.length;
+
+            while (
+                inicioConteudo < resultado.length &&
+                /\s/.test(resultado[inicioConteudo])
+            )
+            {
+                inicioConteudo++;
+            }
+
+            if (qtdeMarcadoresLinha > 1)
+            {
+                fimConteudo = resultado.indexOf(
+                    MultiplasSetasSinalFinal,
+                    inicioConteudo
+                );
+
+                if (
+                    fimConteudo === -1 ||
+                    fimConteudo > fimLinha
+                )
+                {
+                    fimConteudo = fimLinha;
+                }
+            }
+            else
+            {
+                fimConteudo = fimLinha;
+            }
         }
 
         let conteudo = resultado.substring(
@@ -285,34 +316,22 @@ function ConverterSetaParaCloze(texto)
             fimConteudo
         ).trim();
 
-        let delim = '';
-
-        if (
-            conteudo.endsWith(';') ||
-            conteudo.endsWith('.')
-        )
-        {
-            delim = conteudo.slice(-1);
-            conteudo = conteudo.slice(0, -1).trim();
-        }
-
         resultado =
             resultado.substring(0, p) +
+           '? ' +
             MarcadorCloze +
             conteudo +
             MarcadorCloze +
-            delim +
             resultado.substring(fimConteudo);
 
         p = resultado.indexOf(
             MarcadorBasic1,
-            p + MarcadorCloze.length + conteudo.length
+            p + MarcadorCloze.length + conteudo.length + MarcadorCloze.length
         );
     }
 
     return resultado;
 }
-
 function ConverterSetaInversaParaCloze(texto) 
 {
   if (!texto.includes(MarcadorSetaInversa)) return texto;
