@@ -192,123 +192,48 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 function ConverterSetaParaCloze(texto)
 {
-    let resultado = texto;
+    let resultado = texto.replaceAll(MarcadorBasic2, MarcadorBasic1);
 
-    // garantir espaço antes dos marcadores
-//    resultado = resultado.replaceAll(
-//        MarcadorBasic1,
- //       ' ' + MarcadorBasic1
-//    );
+    const totalMarcadores = contarTxtNaString(resultado, MarcadorBasic1);
 
-//    resultado = resultado.replaceAll(
-     //   MarcadorBasic2,
-    //    ' ' + MarcadorBasic2
-   // );
-
-    // padronizar marcador secundário
-    resultado = resultado.replaceAll(
-        MarcadorBasic2,
-        MarcadorBasic1
-    );
-
-    let p = resultado.indexOf(MarcadorBasic1);
-
-    while (p !== -1)
+    // ===============================
+    // APENAS UM MARCADOR
+    // ===============================
+    if (totalMarcadores === 1)
     {
-        // início da linha atual
-        let inicioLinha = resultado.lastIndexOf('\n', p);
+        let p = resultado.indexOf(MarcadorBasic1);
 
-        if (inicioLinha === -1)
-            inicioLinha = 0;
-        else
-            inicioLinha++;
-
-        // fim da linha atual
         let fimLinha = resultado.indexOf('\n', p);
-
         if (fimLinha === -1)
             fimLinha = resultado.length;
 
-        let textoLinha = resultado.substring(inicioLinha, fimLinha);
-
-        let qtdeMarcadoresLinha = contarTxtNaString(
-            textoLinha,
-            MarcadorBasic1
-        );
-
-        // existe conteúdo após o ??
         let restoLinha = resultado.substring(
             p + MarcadorBasic1.length,
             fimLinha
         );
 
-        let marcadorNoFimDaLinha = restoLinha.trim() === '';
-
         let inicioConteudo;
         let fimConteudo;
 
-        // CASO ESPECIAL:
-        // Pergunta termina com ?? e a resposta está nas linhas seguintes
-        if (marcadorNoFimDaLinha)
+        if (restoLinha.trim() !== '')
         {
-            inicioConteudo = fimLinha + 1;
-
-            // procura o fim do bloco (última linha não vazia)
-            fimConteudo = inicioConteudo;
-
-            while (fimConteudo < resultado.length)
-            {
-                let proxQuebra = resultado.indexOf('\n', fimConteudo);
-
-                if (proxQuebra === -1)
-                {
-                    fimConteudo = resultado.length;
-                    break;
-                }
-
-                let linha = resultado.substring(
-                    fimConteudo,
-                    proxQuebra
-                );
-
-                if (linha.trim() === '')
-                    break;
-
-                fimConteudo = proxQuebra + 1;
-            }
-        }
-        else
-        {
-            // comportamento original
+            // resposta na mesma linha
             inicioConteudo = p + MarcadorBasic1.length;
 
             while (
-                inicioConteudo < resultado.length &&
                 /\s/.test(resultado[inicioConteudo])
             )
             {
                 inicioConteudo++;
             }
 
-            if (qtdeMarcadoresLinha > 1)
-            {
-                fimConteudo = resultado.indexOf(
-                    MultiplasSetasSinalFinal,
-                    inicioConteudo
-                );
-
-                if (
-                    fimConteudo === -1 ||
-                    fimConteudo > fimLinha
-                )
-                {
-                    fimConteudo = fimLinha;
-                }
-            }
-            else
-            {
-                fimConteudo = fimLinha;
-            }
+            fimConteudo = fimLinha;
+        }
+        else
+        {
+            // resposta nas linhas seguintes
+            inicioConteudo = fimLinha + 1;
+            fimConteudo = resultado.length;
         }
 
         let conteudo = resultado.substring(
@@ -316,22 +241,79 @@ function ConverterSetaParaCloze(texto)
             fimConteudo
         ).trim();
 
-        resultado =
+        return (
             resultado.substring(0, p) +
-           '? ' +
+            "? " +
             MarcadorCloze +
             conteudo +
-            MarcadorCloze +
-            resultado.substring(fimConteudo);
-
-        p = resultado.indexOf(
-            MarcadorBasic1,
-            p + MarcadorCloze.length + conteudo.length + MarcadorCloze.length
+            MarcadorCloze
         );
     }
 
-    return resultado;
+    // ===============================
+    // VÁRIOS MARCADORES
+    // ===============================
+
+    let linhas = resultado.split('\n');
+
+    for (let i = 0; i < linhas.length; i++)
+    {
+        let linha = linhas[i];
+
+        let p = linha.indexOf(MarcadorBasic1);
+
+        while (p !== -1)
+        {
+            let antes = linha.substring(0, p);
+
+            let depois = linha.substring(
+                p + MarcadorBasic1.length
+            );
+
+            // sem texto depois do >> → ignora
+            if (depois.trim() === '')
+                break;
+
+            let fim;
+
+            if (contarTxtNaString(linha, MarcadorBasic1) > 1)
+            {
+                fim = depois.indexOf(MultiplasSetasSinalFinal);
+
+                if (fim === -1)
+                    fim = depois.length;
+            }
+            else
+            {
+                fim = depois.length;
+            }
+
+            let resposta = depois.substring(0, fim).trim();
+
+            linha =
+                antes +
+                "? " +
+                MarcadorCloze +
+                resposta +
+                MarcadorCloze +
+                depois.substring(fim);
+
+            p = linha.indexOf(
+                MarcadorBasic1,
+                antes.length +
+                resposta.length +
+                MarcadorCloze.length * 2 +
+                2
+            );
+        }
+
+        linhas[i] = linha;
+    }
+
+    return linhas.join('\n');
 }
+
+
 function ConverterSetaInversaParaCloze(texto) 
 {
   if (!texto.includes(MarcadorSetaInversa)) return texto;
