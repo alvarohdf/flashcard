@@ -202,7 +202,7 @@ for (i = 0; i < clozes.length; i++)
 
 // ---------------- SETA → CLOZE ----------------
 
-function TextoTodoParaCloze(texto)
+function TextoTodoParaCloze(texto, paragrafao)
 {
     let resultado = texto.replaceAll(MarcadorBasic2, MarcadorBasic1);
 
@@ -212,9 +212,15 @@ function TextoTodoParaCloze(texto)
     {
         return resultado;
     }
-
-    let fimRespostaCard = resultado.lastIndexOf('.');
-
+	let fimRespostaCard;
+	if (paragrafao == true)
+	{
+	    fimRespostaCard = resultado.lastIndexOf('.');
+	}
+	else
+	{
+		fimRespostaCard = resultado.length - 1;	
+	}
     // Se não houver ponto, usa o final da string
     if (fimRespostaCard === -1)
     {
