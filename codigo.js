@@ -477,7 +477,14 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// -- PARAGRAFÃO
+			// -- PARAGRAFÃO E LISTA
+// PQ NÃO SEPARAR?
+//CONTEXTO:
+//A >> B;
+//C >> D.
+// Exemplo acima gera 2 CARDS:  CONTEXTO: - ↪ A ? XXX (P1),;R1: B CONTEXTO: - ↪ C ? XXX (P1).;R1: D
+// Se usar CONTEXTO >> GERA PARAGRAFÃO, 1 CARD SÓ: CONTEXTO >> - ↪ A ? XXX (P1),↪ C ? XXX (P2).;R1: B<br>R2: D
+
 			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
 				//cardLista += linhaSendoAnalisada; PQ OBTENÇÃO CONTEXTO JÁ ADICIONA
