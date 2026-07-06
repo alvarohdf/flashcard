@@ -85,7 +85,7 @@ function LinhaEContextoParagrafo(linha)
 {
 	let result = false;
 	let linhaTrim = linha.trim();
-	if (linhaTrim.endsWith(':') ||linhaTrim.endsWith('?') || linhaTrim.endsWith(MarcadorBasic1)) 
+	if (linhaTrim.endsWith(':') ||linhaTrim.endsWith('?') || linhaTrim.endsWith(MarcadorBasic1) || linhaTrim.endsWith(MarcadorBasic2)) 
 	{
     		result = true;
   	}
@@ -113,7 +113,7 @@ if (texto.includes(SinalCardJaFeito)) // N incluir se ja feito
 
 // ---------------- CLOZE ----------------
 
-function GerarCardsClozeParaBasic(contexto, card, marcador)
+function GerarCardsClozeParaBasic(card)
 {
 	let clozes = [];
 	let inicioPos, fimPos, i, j;
@@ -125,24 +125,24 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 	// Extrair clozes
 	tempTexto = card;
-	inicioPos = tempTexto.indexOf(marcador);
+	inicioPos = tempTexto.indexOf(MarcadorCloze);
 	while (inicioPos !== -1)
 	{
-		fimPos = tempTexto.indexOf(marcador, inicioPos + marcador.length);
+		fimPos = tempTexto.indexOf(MarcadorCloze, inicioPos + MarcadorCloze.length);
 		if (fimPos === -1) break;
 
 		clozes.push(
 			tempTexto.substring(
-				inicioPos + marcador.length,
+				inicioPos + MarcadorCloze.length,
 				fimPos
 			)
 		);
 
 		tempTexto =
 			tempTexto.substring(0, inicioPos) +
-			tempTexto.substring(fimPos + marcador.length);
+			tempTexto.substring(fimPos + MarcadorCloze.length);
 
-		inicioPos = tempTexto.indexOf(marcador);
+		inicioPos = tempTexto.indexOf(MarcadorCloze);
 	}
 
 	// Modo antigo: 1 card por cloze
@@ -155,7 +155,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 			for (j = 0; j < clozes.length; j++)
 			{
-				let alvo = marcador + clozes[j] + marcador;
+				let alvo = MarcadorCloze + clozes[j] + MarcadorCloze;
 
 				if (i === j)
 					textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
@@ -163,7 +163,7 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 					textoPergunta = textoPergunta.replace(alvo, '...');
 			}
 
-			resultado += contexto + textoPergunta +
+			resultado += textoPergunta +
 				'tempSeparador' +
 				textoResposta + '\n';
 		}
@@ -175,13 +175,25 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 		for (i = 0; i < clozes.length; i++)
 		{
-			let alvo = marcador + clozes[i] + marcador;
-			textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
+			let alvo = MarcadorCloze + clozes[i] + MarcadorCloze;
+			textoPergunta = textoPergunta.replace(alvo, TxtPergunta + ' (P' + (i+1) + ')');
 		}
 
-		textoResposta = clozes.join('<br>');
+		// textoResposta = clozes.join('<br>');
 
-		resultado += contexto + textoPergunta +
+textoResposta = "";
+
+for (i = 0; i < clozes.length; i++)
+{
+    textoResposta += "R" + (i + 1) + ": " + clozes[i];
+
+    if (i < clozes.length - 1)
+    {
+        textoResposta += "<br>";
+    }
+}
+
+		resultado += textoPergunta +
 			'tempSeparador' +
 			textoResposta + '\n';
 	}
@@ -190,129 +202,107 @@ function GerarCardsClozeParaBasic(contexto, card, marcador)
 
 // ---------------- SETA → CLOZE ----------------
 
-function ConverterSetaParaCloze(texto)
+function TextoTodoParaCloze(texto)
 {
     let resultado = texto.replaceAll(MarcadorBasic2, MarcadorBasic1);
 
-    const totalMarcadores = contarTxtNaString(resultado, MarcadorBasic1);
+    let inicioRespostaCard = resultado.indexOf(MarcadorBasic1);
 
-    // ===============================
-    // APENAS UM MARCADOR
-    // ===============================
-    if (totalMarcadores === 1)
+    if (inicioRespostaCard === -1)
     {
-        let p = resultado.indexOf(MarcadorBasic1);
+        return resultado;
+    }
 
-        let fimLinha = resultado.indexOf('\n', p);
-        if (fimLinha === -1)
-            fimLinha = resultado.length;
+    let fimRespostaCard = resultado.lastIndexOf('.');
 
-        let restoLinha = resultado.substring(
-            p + MarcadorBasic1.length,
-            fimLinha
-        );
+    // Se não houver ponto, usa o final da string
+    if (fimRespostaCard === -1)
+    {
+        fimRespostaCard = resultado.length - 1;
+    }
 
-        let inicioConteudo;
-        let fimConteudo;
+    let PerguntaCard =
+        resultado.substring(0, inicioRespostaCard).trim() + " ? ";
 
-        if (restoLinha.trim() !== '')
-        {
-            // resposta na mesma linha
-            inicioConteudo = p + MarcadorBasic1.length;
-
-            while (
-                /\s/.test(resultado[inicioConteudo])
-            )
-            {
-                inicioConteudo++;
-            }
-
-            fimConteudo = fimLinha;
-        }
-        else
-        {
-            // resposta nas linhas seguintes
-            inicioConteudo = fimLinha + 1;
-            fimConteudo = resultado.length;
-        }
-
-        let conteudo = resultado.substring(
-            inicioConteudo,
-            fimConteudo
+    let RespostaCard =
+        resultado.substring(
+            inicioRespostaCard + MarcadorBasic1.length,
+            fimRespostaCard
         ).trim();
 
-        return (
-            resultado.substring(0, p) +
-            "? " +
+    return PerguntaCard + MarcadorCloze + RespostaCard + MarcadorCloze + resultado[fimRespostaCard];
+}
+
+function ConverterSetaParaCloze(texto)
+{
+	let resultado = texto.replaceAll(MarcadorBasic2, MarcadorBasic1);
+
+	if (!resultado.includes(MarcadorBasic1))
+	{
+		return resultado;
+	}
+	
+	const totalMarcadores = contarTxtNaString(resultado, MarcadorBasic1);
+
+	if (totalMarcadores === 1)
+	{
+		return TextoTodoParaCloze(resultado);
+	}
+
+	let inicioRespostaCardIndex = resultado.indexOf(MarcadorBasic1);
+
+	while (inicioRespostaCardIndex !== -1)
+	{
+		// início da resposta (logo após o >>)
+		let inicio = inicioRespostaCardIndex + MarcadorBasic1.length;
+		// pula espaços
+		while (resultado[inicio] === ' ')
+        {
+            inicio++;
+        }
+
+        // procura o ; que termina a resposta
+        let fim = resultado.indexOf(MultiplasSetasSinalFinal, inicio);
+
+        if (fim === -1)
+        {
+	// importante pois vamos simular. Entrada:  "teste ?? oi; vc ?? sim."
+	// Primeira iteração inicioRespostaCardIndex  Encontra o ; 
+	// Tudo certo. 
+	// Depois você faz: resultado = resultado.substring(0, inicioRespostaCardIndex) + "`oi`" + resultado.substring(fim);
+	// O resultado vira algo como: teste `oi`; vc ?? sim. Até aqui tudo bem.
+	// Segunda iteração Agora você procura o próximo ??. Ele encontra: vc ?? sim. 
+	// Mas agora: resultado.indexOf(";", inicio) retorna -1 porque a última resposta termina com . e não com ;
+
+            fim = resultado.lastIndexOf('.');
+
+            if (fim === -1)
+            {
+                fim = resultado.length;
+            }
+        }
+
+        let resposta = resultado.substring(inicio, fim).trim();
+
+        resultado =
+            resultado.substring(0, inicioRespostaCardIndex) +
             MarcadorCloze +
-            conteudo +
-            MarcadorCloze
+            resposta +
+            MarcadorCloze +
+            resultado.substring(fim);
+
+        // procura a próxima seta depois da resposta recém-processada
+        inicioRespostaCardIndex = resultado.indexOf(
+            MarcadorBasic1,
+            inicioRespostaCardIndex + MarcadorCloze.length + resposta.length + MarcadorCloze.length
         );
     }
 
-    // ===============================
-    // VÁRIOS MARCADORES
-    // ===============================
+    // remove as setas restantes
+    resultado = resultado.replaceAll(MarcadorBasic1, "");
 
-    let linhas = resultado.split('\n');
-
-    for (let i = 0; i < linhas.length; i++)
-    {
-        let linha = linhas[i];
-
-        let p = linha.indexOf(MarcadorBasic1);
-
-        while (p !== -1)
-        {
-            let antes = linha.substring(0, p);
-
-            let depois = linha.substring(
-                p + MarcadorBasic1.length
-            );
-
-            // sem texto depois do >> → ignora
-            if (depois.trim() === '')
-                break;
-
-            let fim;
-
-            if (contarTxtNaString(linha, MarcadorBasic1) > 1)
-            {
-                fim = depois.indexOf(MultiplasSetasSinalFinal);
-
-                if (fim === -1)
-                    fim = depois.length;
-            }
-            else
-            {
-                fim = depois.length;
-            }
-
-            let resposta = depois.substring(0, fim).trim();
-
-            linha =
-                antes +
-                "? " +
-                MarcadorCloze +
-                resposta +
-                MarcadorCloze +
-                depois.substring(fim);
-
-            p = linha.indexOf(
-                MarcadorBasic1,
-                antes.length +
-                resposta.length +
-                MarcadorCloze.length * 2 +
-                2
-            );
-        }
-
-        linhas[i] = linha;
-    }
-
-    return linhas.join('\n');
+    return resultado;
 }
-
 
 function ConverterSetaInversaParaCloze(texto) 
 {
@@ -328,25 +318,17 @@ function ConverterSetaInversaParaCloze(texto)
 
 // ---------------- FORMATAR ----------------
 
-function FormatarCards(contexto, cards) 
+function FormatarCard(card) 
 {
-	let novoContexto;
-	let novoResult;
-	novoContexto = limpaMarkdownProAnki(contexto);
-    	novoResult = limpaMarkdownProAnki(cards);
-	if (novoResult.indexOf(MarcadorBasic1) > -1 || novoResult.indexOf(MarcadorBasic2) > -1)
+	if (card.indexOf(MarcadorBasic1) > -1 || card.indexOf(MarcadorBasic2) > -1)
 	{
-        	novoResult = ConverterSetaParaCloze(novoResult);	
+        	card = ConverterSetaParaCloze(card);	
 	}
-	if (novoResult.indexOf(MarcadorSetaInversa) > -1)
+	if (card.indexOf(MarcadorSetaInversa) > -1)
 	{
-		novoResult = ConverterSetaInversaParaCloze(novoResult);
+		card = ConverterSetaInversaParaCloze(card);
 	}
-	if (novoResult.indexOf(MarcadorCloze) > -1) 
-	{
-		return GerarCardsClozeParaBasic(novoContexto, novoResult, MarcadorCloze);
-	} 
-
+	return card;
 }
 
 
@@ -451,6 +433,11 @@ function criarCartoes(textoOriginal)
 				AssuntoNomeArq = linhaTrim.substring(4).trim();
 				contexto = `${AssuntoNomeArq} - `;
 		}
+		// -- OBTER CONTEXTOS
+		if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
+		{
+			contextoParagrafo += linhaSendoAnalisada + ' - ';
+		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
 			// -- É TABELA
@@ -470,7 +457,7 @@ function criarCartoes(textoOriginal)
 				{
 					if (ProcuraCloze(linhasTabela[j]) === true) 
 					{
-						cardsCSV += FormatarCards(contexto, TabelaFormatoTexto(linhasTabela[0], linhasTabela[j]));
+						cardsCSV += contexto + GerarCardsClozeParaBasic(FormatarCard(TabelaFormatoTexto(linhasTabela[0], linhasTabela[j])));
 						// MARKDOWN FINAL
 						let posBarraFinal = linhasOriginais[k].lastIndexOf('|');
 						let textoAntesBarra = linhasOriginais[k].substring(0, posBarraFinal);
@@ -485,100 +472,94 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// -- CARD NORMAL
-			else if (ProcuraCloze(linhaSendoAnalisada) == true)
+			// -- PARAGRAFÃO
+			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
-				cardLista += TabsLista(linhaSendoAnalisada);
-				cardLista += '\n';
+				//cardLista += linhaSendoAnalisada; PQ OBTENÇÃO CONTEXTO JÁ ADICIONA
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
-
-				if (!linhaSendoAnalisada.trim().endsWith('.')) // tem mais = PARAGRAFÃO, LISTA.
-				{ // Não pode ser ; pois se eu quiser colocar um paciente deitado: - próxima linha?				
-					while (i + 1 < linhas.length)
-					{
-    						i++;		
-						linhaSendoAnalisada = linhas[i];
+				while (i + 1 < linhas.length)
+				{
+    					i++;		
+					linhaSendoAnalisada = linhas[i];
 						
-						if (linhaSendoAnalisada.trim().startsWith('|'))
+					if (linhaSendoAnalisada.trim().startsWith('|'))
+					{
+						if (TemTabela == false)
 						{
-							if (TemTabela == false)
+							TabelaLinhaHeader = linhaSendoAnalisada;
+							linhaSendoAnalisada = '';
+						}
+						else
+						{
+							if (linhaSendoAnalisada.includes('| - |'))
 							{
-								TabelaLinhaHeader = linhaSendoAnalisada;
 								linhaSendoAnalisada = '';
 							}
 							else
 							{
-								if (linhaSendoAnalisada.includes('| - |'))
-								{
-									linhaSendoAnalisada = '';
-								}
-								else
-								{
-									linhaSendoAnalisada = TabelaFormatoTexto(TabelaLinhaHeader, linhaSendoAnalisada);
-								}
+								linhaSendoAnalisada = TabelaFormatoTexto(TabelaLinhaHeader, linhaSendoAnalisada);
 							}
-							TemTabela = true;
 						}
+						TemTabela = true;
+					}
 
-						if (linhaSendoAnalisada.trim() !== '') 
-						{
-    							cardLista += TabsLista(linhaSendoAnalisada);
-							cardLista += '\n';
-	 					}
-						if (linhaSendoAnalisada.trim().endsWith('.'))
-   						{
-							break;
-  						}
-						if (TemTabela &&(i + 1 >= linhas.length ||linhas[i + 1].trim() === ''))
-						{
-							break;
-						}
+					if (linhaSendoAnalisada.trim() !== '') 
+					{
+    						cardLista += FormatarCard(TabsLista(linhaSendoAnalisada));
+	 				}
+					if (linhaSendoAnalisada.trim().endsWith('.'))
+   					{
+						break;
+  					}
+					if (TemTabela &&(i + 1 >= linhas.length ||linhas[i + 1].trim() === ''))
+					{
+						break;
 					}
 				}
-				if (contextoParagrafo !== '') 
+				if (!cardLista.includes(MarcadorCloze)) // adicionar tudo
 				{
-					cardsCSV += FormatarCards(contexto + contextoParagrafo, cardLista);
-				} 
-				else 
-				{
-					cardsCSV += FormatarCards(contexto, cardLista);
+					cardLista = TextoTodoParaCloze(cardLista);
 				}
+				cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
 				cardLista = '';
 				contadorCards++;
 		//		contextoParagrafo = '';
 				TemTabela = false;
 			}
 			// ---------- CARD ÚNICO com cloze provavelmente
-	//		else 
-	//		{
-
-//				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
-//				{
-//					// APLICAR CONTEXTO PARÁGRAFO
-//					if (contextoParagrafo !== '') 
-//					{
-//						cardsCSV += FormatarCards(contexto + contextoParagrafo, ConverterSetaParaCloze(linhaSendoAnalisada));
-//					} 
-//					else 
-//					{
-//						cardsCSV += FormatarCards(contexto, ConverterSetaParaCloze(linhaSendoAnalisada));
-//					}
-//					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
-//					contadorCards++;
-//				}
-//			}
-			// resetar contexto paragrafo
-			if ((contextoParagrafo !== '') && (!linhaSendoAnalisada.trim().startsWith('-')))
-            {
-    				contextoParagrafo = '';
-			}
-			// -- OBTER CONTEXTOS
-			if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
+			else 
 			{
-				contextoParagrafo = linhaSendoAnalisada + ' ';
+
+				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
+				{
+					cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + TabsLista(FormatarCard(linhaSendoAnalisada)));
+					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+					contadorCards++;
+				}
 			}
 		}
+		// resetar contexto paragrafo
+		if ( (contextoParagrafo !== '') && (linhaSendoAnalisada.trim().endsWith('.')) )
+           	{
+			if ( (linhaSendoAnalisada.trim().startsWith('-')) && (linhas[i+1].trim() == "") )
+			{
+				contextoParagrafo = '';
+				// aqui pega por ex:
+				// TESTE:
+				// - A.
+				// - B.
+				//
+				// OI:
+				// -C .
+				// Então eu não deixo ficar TESTE: - OI :
+			}
+			if (!linhaSendoAnalisada.trim().startsWith('-'))
+			{
+    				contextoParagrafo = '';
+			}
+		}
+		// -- OBTER CONTEXTOS joguei para cima era aqui
 		i++;
 	}
 	// FINAL
