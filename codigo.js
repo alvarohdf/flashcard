@@ -249,10 +249,9 @@ function ConverterSetaParaCloze(texto)
 	}
 	
 	const totalMarcadores = contarTxtNaString(resultado, MarcadorBasic1);
-
 	if (totalMarcadores === 1)
 	{
-		return TextoTodoParaCloze(resultado);
+		return TextoTodoParaCloze(resultado, false);
 	}
 
 	let inicioRespostaCardIndex = resultado.indexOf(MarcadorBasic1);
@@ -525,9 +524,13 @@ function criarCartoes(textoOriginal)
 				}
 				if (!cardLista.includes(MarcadorCloze)) // adicionar tudo
 				{
-					cardLista = TextoTodoParaCloze(cardLista);
+					cardLista = TextoTodoParaCloze(contexto + contextoParagrafo + cardLista, true);
+					cardsCSV += GerarCardsClozeParaBasic(cardLista);
 				}
-				cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
+				else
+				{
+					cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
+				}
 				cardLista = '';
 				contadorCards++;
 		//		contextoParagrafo = '';
