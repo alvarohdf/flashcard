@@ -452,13 +452,15 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// INDIVIDUAL + LISTÃO PEGA TUDO >>
-			// PARA NÃO PEGAR TUDO, USAR :
+			// LISTA
 			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
+				let linha1 = linhaSendoAnalisada;
 				cardLista += linhaSendoAnalisada; 
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+
+				// Capturar linhas				
 				while (i + 1 < linhas.length)
 				{	
     					i++;
@@ -500,6 +502,23 @@ function criarCartoes(textoOriginal)
 					{
 						break;
 					}
+				}
+
+				// Checar se tem marcador. Ex: 
+				// Teste >>
+				// Exemplo `sim`.
+				// No ex. acima precisa eliminar o >> do teste.
+				let ProcuraClozeSemSerPrimeiraLinhaCardLista = cardLista;
+				ProcuraClozeSemSerPrimeiraLinhaCardLista = cardLista.replace(linha1, '');
+				if (ProcuraCloze(ProcuraClozeSemSerPrimeiraLinhaCardLista) == true)
+				{
+					let linha1semomarcadorfinal;
+					let indexUltimoMarcador;
+					indexUltimoMarcador = linha1.lastIndexOf(MarcadorBasic1);
+					linha1semomarcadorfinal = linha1.slice(0, indexUltimoMarcador) + linha1.slice(indexUltimoMarcador + MarcadorBasic1.length);
+					indexUltimoMarcador = linha1.lastIndexOf(MarcadorBasic2);
+					linha1semomarcadorfinal = linha1.slice(0, indexUltimoMarcador) + linha1.slice(indexUltimoMarcador + MarcadorBasic2.length);
+					cardLista = cardLista.replace(linha1, linha1semomarcadorfinal);
 				}
 				cardLista = ConverterSetas(contexto + contextoParagrafo + cardLista);
 				cardsCSV += GerarCardsClozeParaBasic(cardLista);
