@@ -452,11 +452,11 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// LISTA
+			// PEGAR TUDO ATÉ PONTO FINAL
 			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
-				let linha1 = linhaSendoAnalisada;
-				cardLista += linhaSendoAnalisada; 
+				let linha1 = TabsLista(linhaSendoAnalisada);
+				cardLista += linha1; 
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 
@@ -503,8 +503,7 @@ function criarCartoes(textoOriginal)
 						break;
 					}
 				}
-
-				// Checar se tem marcador. Ex: 
+				// Checar se tem marcador após o >> final. Ex: 
 				// Teste >>
 				// Exemplo `sim`.
 				// No ex. acima precisa eliminar o >> do teste.
@@ -527,6 +526,7 @@ function criarCartoes(textoOriginal)
 		//		contextoParagrafo = '';
 				TemTabela = false;
 			}
+			// PEGAR SÓ LINHA
 			else 
 			{
 				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
