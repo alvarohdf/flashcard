@@ -337,23 +337,29 @@ function ConverterSetas(card)
 
 function TabsLista(linha)
 {
-	let espacos = 0;
+    let espacos = 0;
 
-	for (let i = 0; i < linha.length; i++)
-	{
-		if (linha[i] === ' ')
-			espacos++;
-		else if (linha[i] === '\t')
-			espacos += 3;
-		else
-			break;
-	}
+    for (let i = 0; i < linha.length; i++)
+    {
+        if (linha[i] === ' ')
+            espacos++;
+        else if (linha[i] === '\t')
+            espacos += 3;
+        else
+            break;
+    }
 
-	let nivel = Math.floor(espacos / 3) + 1;
+    let texto = linha.trimStart().replace(/^-\s*/, '');
 
-	let texto = linha.trimStart().replace(/^-\s*/, '');
+    // Não é item de lista (sem indentação e sem "-")
+    if (espacos === 0 && !linha.trimStart().startsWith('-'))
+    {
+        return texto;
+    }
 
-	return SetaLista.repeat(nivel) + ' ' + texto;
+    let nivel = Math.floor(espacos / 3) + 1;
+
+    return SetaLista.repeat(nivel) + ' ' + texto;
 }
 
 // ---------------- PRINCIPAL ----------------
@@ -443,7 +449,14 @@ function criarCartoes(textoOriginal)
 		// -- OBTER CONTEXTOS
 		if (LinhaEContextoParagrafo(linhaSendoAnalisada)) 
 		{
-			contextoParagrafo += linhaSendoAnalisada + ' - ';
+			if (contextoParagrafo != '')
+			{
+				contextoParagrafo += ' - ' + linhaSendoAnalisada;
+			}
+			else
+			{
+				contextoParagrafo = linhaSendoAnalisada;
+			}
 		}
 		if (linhaTrim !== '' && !linhasOriginais[i].includes(SinalCardJaFeito)) 
 		{
@@ -573,7 +586,7 @@ function criarCartoes(textoOriginal)
 			{
 				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
 				{
-					cardsCSV += GerarCardsClozeParaBasic(ConverterSetas(contexto + contextoParagrafo + TabsLista(linhaSendoAnalisada)));
+					cardsCSV += GerarCardsClozeParaBasic(ConverterSetas(contexto + contextoParagrafo + linhaSendoAnalisada));
 					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 					contadorCards++;
 				}
