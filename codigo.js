@@ -85,10 +85,12 @@ function LinhaEContextoParagrafo(linha)
 {
 	let result = false;
 	let linhaTrim = linha.trim();
-	if (linhaTrim.endsWith(':') ||linhaTrim.endsWith('?')) 
+	if (!linhaTrim.endsWith(MarcadorBasic1)  && !linhaTrim.endsWith(MarcadorBasic2)  && (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')))	
 	{
     		result = true;
   	}
+
+	 // || linhaTrim.endsWith(MarcadorBasic1) || linhaTrim.endsWith(MarcadorBasic2)) 
   	return result;
 }
 
@@ -210,7 +212,7 @@ function ConverterSetaNormalParaCloze(texto)
 	{
 		return resultado;
 	}
-
+	
 	let inicioRespostaCardIndex = resultado.indexOf(MarcadorBasic1);
 
 	while (inicioRespostaCardIndex !== -1)
@@ -227,23 +229,12 @@ function ConverterSetaNormalParaCloze(texto)
             		inicioRespostaCardIndexAjustado++;
 		}
 
-		// Se não existe texto após o último >>
-		if (inicioRespostaCardIndexAjustado >= resultado.length)
-		{
-    			break;
-		}
-
-
 		// DETERMINAR FINAL DA PRIMEIRA RESPOSTA
 		let finalRespostaCardIndex;
 
-	
-// Procura se existe outro marcador após o atual
-const proximoMarcadorIndex = resultado.indexOf(
-    MarcadorBasic1,
-    inicioRespostaCardIndex + MarcadorBasic1.length
-);
-
+		
+		// Procura se existe outro marcador após o atual
+		const proximoMarcadorIndex = resultado.indexOf(MarcadorBasic1, inicioRespostaCardIndex + MarcadorBasic1.length);
 
 		if (proximoMarcadorIndex === -1) // NÃO EXISTE OUTRO >>
 		{
@@ -274,7 +265,7 @@ const proximoMarcadorIndex = resultado.indexOf(
 		}
 
 
-	        let resposta = resultado.substring(inicioRespostaCardIndexAjustado, finalRespostaCardIndex).trim();
+	        let resposta = resultado.substring(inicioRespostaCardIndexAjustado, finalRespostaCardIndex + 1).trim();
 		
 		resultado = resultado.substring(0, inicioRespostaCardIndex) +
 			MarcadorCloze + resposta + MarcadorCloze + resultado.substring(finalRespostaCardIndex);
@@ -304,6 +295,11 @@ function ConverterSetaInversaParaCloze(texto)
 
 function ConverterSetas(card) 
 {
+	card = card.replace(MarcadorBasic1, '? ??');
+	if (card.includes(MarcadorBasic1) && card[card.indexOf(MarcadorBasic1) - 1] != " ")
+	{
+		card = card.replace(MarcadorBasic1, ' ' + MarcadorBasic1);
+	}
 	if (card.indexOf(MarcadorBasic1) > -1 || card.indexOf(MarcadorBasic2) > -1)
 	{
         	card = ConverterSetaNormalParaCloze(card);	
@@ -456,16 +452,18 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			else
+			// INDIVIDUAL + LISTÃO PEGA TUDO >>
+			// PARA NÃO PEGAR TUDO, USAR :
+			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
-				cardLista += linhaSendoAnalisada;
+				cardLista += linhaSendoAnalisada; 
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 				while (i + 1 < linhas.length)
-				{
-    					i++;		
+				{	
+    					i++;
 					linhaSendoAnalisada = linhas[i];
-						
+
 					if (linhaSendoAnalisada.trim().startsWith('|'))
 					{
 						if (TemTabela == false)
@@ -491,21 +489,33 @@ function criarCartoes(textoOriginal)
 					{
     						cardLista += TabsLista(linhaSendoAnalisada);
 	 				}
+
+						
 					if (linhaSendoAnalisada.trim().endsWith('.'))
    					{
 						break;
   					}
+
 					if (TemTabela &&(i + 1 >= linhas.length ||linhas[i + 1].trim() === ''))
 					{
 						break;
 					}
 				}
-				cardLista = ConverterSetas(cardLista);
-				cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
+				cardLista = ConverterSetas(contexto + contextoParagrafo + cardLista);
+				cardsCSV += GerarCardsClozeParaBasic(cardLista);
 				cardLista = '';
 				contadorCards++;
 		//		contextoParagrafo = '';
 				TemTabela = false;
+			}
+			else 
+			{
+				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
+				{
+					cardsCSV += GerarCardsClozeParaBasic(ConverterSetas(contexto + contextoParagrafo + TabsLista(linhaSendoAnalisada)));
+					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
+					contadorCards++;
+				}
 			}
 		}
 		// resetar contexto paragrafo
