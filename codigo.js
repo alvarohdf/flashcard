@@ -408,19 +408,23 @@ function criarCartoes(textoOriginal)
 		{
       			H4 = linhaTrim.substring(4).trim();
 			contexto = `${H1} - ${H2} - ${H3} - ${H4} - `;
+			contextoParagrafo = '';
 		}
     		else if (linhaTrim.startsWith('###')) 
 		{
       			H3 = linhaTrim.substring(3).trim();
      			contexto = `${H1} - ${H2} - ${H3} - `;
+			contextoParagrafo = '';
     		}
 		else if (linhaTrim.startsWith('##')) 
 		{
 			H2 = linhaTrim.substring(2).trim();
 			contexto = `${H1} - ${H2} - `;
+			contextoParagrafo = '';
     		}
-    	else if (linhaTrim.startsWith('# ')) 
+    		else if (linhaTrim.startsWith('# ')) 
 		{
+			contextoParagrafo = '';
       			if (AssuntoNomeArq !== '') 
 				{
 					H1 =  AssuntoNomeArq + ' - ' + linhaTrim.substring(2).trim();
@@ -576,9 +580,9 @@ function criarCartoes(textoOriginal)
 			}
 		}
 		// resetar contexto paragrafo
-		if ( (contextoParagrafo !== '') && (linhaSendoAnalisada.trim().endsWith('.')) )
+		if ( (contextoParagrafo !== '') && (linhaSendoAnalisada.trim().endsWith('.')) && (!linhaSendoAnalisada.trim().endsWith('...')) )
            	{
-			if ( (linhaSendoAnalisada.trim().startsWith('-')) && (linhas[i+1].trim() == "") && (!linhas[i+2].trim().startsWith('-')) )
+			if ( (linhaSendoAnalisada.trim().startsWith('-')) && (linhas[i+1].trim() == ""))
 			{
 				contextoParagrafo = '';
 				// aqui pega por ex:
