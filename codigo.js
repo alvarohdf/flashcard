@@ -1,6 +1,7 @@
 // CONSTANTES
 const SinalCardJaFeito = ' OK!';
 const SeparadorPerguntaResposta = ';'; // >> = remnote
+const SinalFazerLista = ';';
 const MarcadorCloze = '`';
 const MarcadorBasic2 = '>>'; //⇒
 const MarcadorBasic1 = '??';
@@ -338,7 +339,10 @@ function ConverterSetas(card)
 function TabsLista(linha)
 {
     let espacos = 0;
-
+    if (espacos === 0 && !linha.trimStart().startsWith('-'))
+    {
+       espacos++;
+    }
     for (let i = 0; i < linha.length; i++)
     {
         if (linha[i] === ' ')
@@ -351,11 +355,11 @@ function TabsLista(linha)
 
     let texto = linha.trimStart().replace(/^-\s*/, '');
 
-    // Não é item de lista (sem indentação e sem "-")
-    if (espacos === 0 && !linha.trimStart().startsWith('-'))
-    {
-        return texto;
-    }
+//    // Não é item de lista (sem indentação e sem "-")
+ //   if (espacos === 0 && !linha.trimStart().startsWith('-'))
+//    {
+ //       return texto;
+//    }
 
     let nivel = Math.floor(espacos / 3) + 1;
 
@@ -492,7 +496,7 @@ function criarCartoes(textoOriginal)
 					}
 				}
 			}
-			// PEGAR TUDO ATÉ PONTO FINAL
+			// PERGUNTA ABERTA - PEGAR TUDO ATÉ PONTO FINAL
 			else if ((linhaSendoAnalisada.trim().endsWith('>>') || linhaSendoAnalisada.trim().endsWith('??'))) 
 			{
 				let linha1 = linhaSendoAnalisada;
@@ -581,12 +585,31 @@ function criarCartoes(textoOriginal)
 		//		contextoParagrafo = '';
 				TemTabela = false;
 			}
-			// PEGAR SÓ LINHA
+
+			// INDIVIDUAL E LISTA - PEGAR SÓ LINHAS COM CLOZE OU SinalFazerLista
 			else 
 			{
-				if (ProcuraCloze(linhaSendoAnalisada) === true && LinhaEContextoParagrafo(linhaSendoAnalisada) === false) 
+				if ( (ProcuraCloze(linhaSendoAnalisada) === true) && (LinhaEContextoParagrafo(linhaSendoAnalisada) === false)) 
 				{
-					cardsCSV += GerarCardsClozeParaBasic(ConverterSetas(contexto + contextoParagrafo + linhaSendoAnalisada));
+					cardLista = ConverterSetas(linhaSendoAnalisada);
+					if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
+					{
+						cardLista = TabsLista(cardLista);
+						while (i < linhas.length)
+						{	
+							i++;
+							linhaSendoAnalisada = linhas[i];
+							if ( (ProcuraCloze(linhaSendoAnalisada) == true) || (linhaSendoAnalisada.trim().endsWith(SinalFazerLista)) )
+							{
+								cardLista += '\n ' + TabsLista(ConverterSetas(linhaSendoAnalisada));
+							}
+							if (linhaSendoAnalisada.trim().endsWith('.'))
+							{
+			    					break;
+							}
+						}
+					}
+					cardsCSV += GerarCardsClozeParaBasic(ConverterSetas(contexto + contextoParagrafo + cardLista));
 					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 					contadorCards++;
 				}
