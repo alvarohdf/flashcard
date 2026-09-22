@@ -9,7 +9,7 @@ const MarcadorListaInteira = '<';
 const MarcadorSetaInversa = '<<';
 const BulletNoCard = '⇒';
 const SetaLista = '↪';
-const TxtPergunta = 'XXX';
+const TxtPergunta = '';
 const CaractereListaPraIncluirMesmoSemCard = '[]';
 const MultiplasSetasSinalFinal = ';';
 const CadaCloze1Card = '[2]';
@@ -236,9 +236,9 @@ function ConverterSetaNormalParaCloze(texto)
 
 		
 		// Procura se existe outro marcador após o atual
-		const proximoMarcadorIndex = resultado.indexOf(MarcadorBasic1, inicioRespostaCardIndex + MarcadorBasic1.length);
 
-		if (proximoMarcadorIndex === -1) // NÃO EXISTE OUTRO >>
+		
+		if (!ProcuraCloze(resultado.slice(inicioRespostaCardIndex + MarcadorBasic1.length))) // NÃO EXISTE OUTRO marcador
 		{
 			finalRespostaCardIndex = resultado.lastIndexOf('.');
 		}
