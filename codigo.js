@@ -11,7 +11,7 @@ const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = '';
 const CaractereListaPraIncluirMesmoSemCard = '[]';
-const SinalMarcaFimSetaResposta = ';';
+const SinalMarcaFimSetaResposta = ' ;'; // coloquei espaçin pra diferenciar do ; em listas
 const CadaCloze1Card = '[2]';
 // ---------------- UTIL ----------------
 
@@ -244,18 +244,8 @@ function ConverterSetaNormalParaCloze(texto)
 		let finalRespostaCardIndex;
 
 		
-		// Procura se existe outro marcador após o atual
-
-		
-//		if (!ProcuraCloze(resultado.slice(inicioRespostaCardIndex + MarcadorParagrafao.length))) // NÃO EXISTE OUTRO marcador
-//		{
-//			finalRespostaCardIndex = resultado.lastIndexOf('.');
-//		}
-//		else
-//		{
-		// procura o ; que termina a resposta
 		// Descobre em que linha está o marcador atual
-		const fimLinhaAtual = resultado.indexOf('\n', inicioRespostaCardIndex);
+		const fimLinhaAtual = resultado.indexOf('\n', inicioRespostaCardIndex); // parece que só a tabela está usando isso. dps checar pra apagar
 		// Se não houver quebra ou o próximo marcador estiver na mesma linha,
     		// continua usando ';' para separar respostas.
     		if (fimLinhaAtual === -1 || proximoMarcadorIndex < fimLinhaAtual)
@@ -593,27 +583,46 @@ function criarCartoes(textoOriginal)
 			// INDIVIDUAL E LISTA - PEGAR SÓ LINHAS COM CLOZE OU SinalFazerLista
 			else 
 			{
+				// MECANISMO 1:
+				// Febre da dengue é subdividida em: 
+				// - Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta; 
+				// - Dengue clássica; 
+				// - Febre hemorrágica da dengue; 
+				// - Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave;
+					// a partir da >> vai virar tudo resposta, inclusive o dengue grave
+
+				// MECANISMO 1.2:
+				// Febre da dengue é subdividida em: 
+				// - Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta ; 
+				// - Dengue clássica; 
+				// - Febre hemorrágica da dengue; 
+				// - Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave;
+					// >> vai pegar só a linha do febre indiferenciada na resposta. O resto da lista continua na pergunta e vai ser mostrado pois tem ;
+
+				// esses mecanismos não usam mais o \n
+
 				if ( (ProcuraCloze(linhaSendoAnalisada) === true) && (LinhaEContextoParagrafo(linhaSendoAnalisada) === false)) 
 				{
-					cardLista = ConverterSetasParaCloze(linhaSendoAnalisada);
+					cardLista = linhaSendoAnalisada;
 					if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 					{
-						cardLista = ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada));
+						cardLista = TabsLista(linhaSendoAnalisada);
 						while (i < linhas.length)
 						{	
 							i++;
 							linhaSendoAnalisada = linhas[i];
 							if ( (ProcuraCloze(linhaSendoAnalisada) == true) || (linhaSendoAnalisada.trim().endsWith(SinalFazerLista)) )
 							{
-								cardLista += '\n ' + ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada));
+								cardLista += TabsLista(linhaSendoAnalisada); // '\n ' + TabsLista(linhaSendoAnalisada);
 							}
-							if (linhaSendoAnalisada.trim().endsWith('.'))
+							else
 							{
 			    					break;
 							}
 						}
 					}
-					cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
+					cardsCSV += GerarCardsClozeParaBasic(ConverterSetasParaCloze(contexto + contextoParagrafo + cardLista));
+
 					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 					contadorCards++;
 				}
@@ -651,7 +660,7 @@ function criarCartoes(textoOriginal)
 	}	
 	if (SeparadorPerguntaResposta === ';')
 	{
-		cardsCSV = cardsCSV.replaceAll(';', ',');
+		cardsCSV = cardsCSV.replaceAll(';', ','); 
 	}	
 	cardsCSV= cardsCSV.replaceAll('tempSeparador', SeparadorPerguntaResposta);
 	contadorCards = contadorCards * SinalCardJaFeito.length;
