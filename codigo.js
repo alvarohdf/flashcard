@@ -30,9 +30,8 @@ const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = '';
 const CaractereListaPraIncluirMesmoSemCard = '[]';
+const SinalMarcaFimSetaResposta = '; ';  // MECANISMO 1 ver comentário gerarcards-  coloquei espaçin pra diferenciar do ; em listas
 //const SinalMarcaFimSetaResposta = ';'; // mecanismo 2
-
- const SinalMarcaFimSetaResposta = '; ';  // MECANISMO 1 ver comentário gerarcards-  coloquei espaçin pra diferenciar do ; em listas
 const CadaCloze1Card = '[2]';
 // ---------------- UTIL ----------------
 
