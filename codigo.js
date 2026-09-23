@@ -191,7 +191,7 @@ function GerarCardsClozeParaBasic(card)
 		for (i = 0; i < clozes.length; i++)
 		{
 			let alvo = MarcadorCloze + clozes[i] + MarcadorCloze;
-			textoPergunta = textoPergunta.replace(alvo, TxtPergunta + ' (P' + (i+1) + ')');
+			textoPergunta = textoPergunta.replace(alvo, TxtPergunta + '(P' + (i+1) + ')');
 		}
 
 		// textoResposta = clozes.join('<br>');
@@ -293,7 +293,7 @@ function ConverterSetaNormalParaCloze(texto)
 	        let resposta = resultado.substring(inicioRespostaCardIndexAjustado, finalRespostaCardIndex + 1).trim();
 		
 		resultado = resultado.substring(0, inicioRespostaCardIndex) +
-			MarcadorCloze + resposta + MarcadorCloze + resultado.substring(finalRespostaCardIndex);
+			MarcadorCloze + resposta + MarcadorCloze + resultado.substring(finalRespostaCardIndex + SinalMarcaFimSetaResposta.length);
 		
 		// procura a próxima seta depois da resposta recém-processada
 
