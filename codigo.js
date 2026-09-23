@@ -1,3 +1,22 @@
+//MECANISMO
+//Febre da dengue é subdividida em:
+//- Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta; < aqui tem SinalMarcaFimSetaResposta. Vai vir só ate aqui NA RESPOSTA. Na pergunta vai pegar os debaixo pois tem SinalFazerLista
+//- Dengue clássica;
+//- Febre hemorrágica da dengue;
+//- Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave.
+
+//Febre da dengue é subdividida em:
+//- Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta;< Vai pegar os de baixo tudo NA RESPOSTA pois n tem SinalMarcaFimSetaResposta
+//- Dengue clássica;
+//- Febre hemorrágica da dengue;
+//- Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave.
+
+//Febre da dengue é subdividida em:
+//- Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta. < Vai pegar só aqui na RESPOSTA e tbm na PERGUNTA. Vai ignorar os de baixo pois n tem SinalFazerLista
+//- Dengue clássica.
+//- Febre hemorrágica da dengue.
+//- Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave.
+
 // CONSTANTES
 const SinalCardJaFeito = ' OK!';
 const SeparadorPerguntaResposta = ';'; // >> = remnote
@@ -11,7 +30,9 @@ const BulletNoCard = '⇒';
 const SetaLista = '↪';
 const TxtPergunta = '';
 const CaractereListaPraIncluirMesmoSemCard = '[]';
-const SinalMarcaFimSetaResposta = ' ;'; // coloquei espaçin pra diferenciar do ; em listas
+//const SinalMarcaFimSetaResposta = ';'; // mecanismo 2
+
+ const SinalMarcaFimSetaResposta = '; ';  // MECANISMO 1 ver comentário gerarcards-  coloquei espaçin pra diferenciar do ; em listas
 const CadaCloze1Card = '[2]';
 // ---------------- UTIL ----------------
 
@@ -87,7 +108,7 @@ function LinhaEContextoParagrafo(linha)
 	let result = false;
 	let linhaTrim = linha.trim();
 	//if (!linhaTrim.endsWith(MarcadorParagrafao)  && !linhaTrim.endsWith(MarcadorSetaNrl)  && (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')))	
-	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?') || linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
+	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')) //linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
 	{
     		result = true;
   	}
@@ -223,7 +244,6 @@ function ConverterSetaNormalParaCloze(texto)
 	{
 		return resultado;
 	}
-	
 	let inicioRespostaCardIndex = resultado.indexOf(MarcadorParagrafao);
 
 	while (inicioRespostaCardIndex !== -1)
@@ -571,9 +591,8 @@ function criarCartoes(textoOriginal)
 //					linha1semomarcadorfinal = linha1.slice(0, indexUltimoMarcador) + linha1.slice(indexUltimoMarcador + MarcadorSetaNrl.length);
 //					cardLista = cardLista.replace(linha1, linha1semomarcadorfinal);
 //				}
-				cardLista = linha1 + MarcadorCloze + limparClozes(cardLista) + MarcadorCloze;
-				cardsCSV += GerarCardsClozeParaBasic(cardLista);
-
+				cardLista = TabsLista(linha1) + MarcadorCloze + limparClozes(cardLista) + MarcadorCloze;
+				cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
 				cardLista = '';
 				contadorCards++;
 		//		contextoParagrafo = '';
@@ -599,29 +618,41 @@ function criarCartoes(textoOriginal)
 				// - Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave;
 					// >> vai pegar só a linha do febre indiferenciada na resposta. O resto da lista continua na pergunta e vai ser mostrado pois tem ;
 
-				// esses mecanismos não usam mais o \n
+				// MECANISMO 2
+				// Febre da dengue é subdividida em: 
+				// - Febre indiferenciada (síndrome viral) - agora é chamada de >> dengue sem sinais de alerta 
+				// - Dengue clássica; 
+				// - Febre hemorrágica da dengue; 
+				// - Síndrome de choque da dengue (DHF/DSS) - agora é dengue grave;
+					// a partir da >> não vira tudo resposta. somente a linha do >>. a leitura é linha por linha.
+
 
 				if ( (ProcuraCloze(linhaSendoAnalisada) === true) && (LinhaEContextoParagrafo(linhaSendoAnalisada) === false)) 
 				{
-					cardLista = linhaSendoAnalisada;
+					 cardLista = linhaSendoAnalisada; // mecanismo 1 explicado acima
+					//cardLista = ConverterSetasParaCloze(linhaSendoAnalisada); // mecanismo 2
 					if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 					{
-						cardLista = TabsLista(linhaSendoAnalisada);
+						cardLista = TabsLista(cardLista);
 						while (i < linhas.length)
 						{	
 							i++;
 							linhaSendoAnalisada = linhas[i];
-							if ( (ProcuraCloze(linhaSendoAnalisada) == true) || (linhaSendoAnalisada.trim().endsWith(SinalFazerLista)) )
+							if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 							{
-								cardLista += TabsLista(linhaSendoAnalisada); // '\n ' + TabsLista(linhaSendoAnalisada);
+								 cardLista += TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
+								//cardLista += ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada)); // mecanismo 2 - linha por linha
 							}
 							else
 							{
+								 cardLista += TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
+								//cardLista += ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada)); // mecanismo 2 - linha por linha
 			    					break;
 							}
 						}
 					}
-					cardsCSV += GerarCardsClozeParaBasic(ConverterSetasParaCloze(contexto + contextoParagrafo + cardLista));
+					cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + ConverterSetasParaCloze(cardLista)); // mecanismo 1
+					//cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista); // mecanismo 2
 
 					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
 					contadorCards++;
