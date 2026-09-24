@@ -153,9 +153,8 @@ function LinhaEContextoParagrafo(linha)
 	let result = false;
 	let linhaTrim = linha.trim();
 	//if (!linhaTrim.endsWith(MarcadorParagrafao)  && !linhaTrim.endsWith(MarcadorSetaNrl)  && (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')))	
-	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')  && !linhaTrim.endsWith(MarcadorParagrafao))
+	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?') || linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
 	{
-//linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
     		result = true;
   	}
 
@@ -184,13 +183,37 @@ if (texto.includes(SinalCardJaFeito)) // N incluir se ja feito
 
 function limparClozes(texto)
 {
-  let result = texto;
+	let tempTexto = texto;
+	let textonew;
+	let inicioPos, fimPos;
+	let clozes = [];
+	let i;
+	inicioPos = tempTexto.indexOf(MarcadorCloze);
+	while (inicioPos !== -1)
+	{
+		fimPos = tempTexto.indexOf(MarcadorCloze, inicioPos + MarcadorCloze.length);
+		if (fimPos === -1) break;
 
-  result = result.replaceAll(MarcadorCloze, '');
-  result = result.replaceAll(MarcadorParagrafao, '');
-  result = result.replaceAll(MarcadorSetaNrl, '');
-  result = result.replaceAll(MarcadorSetaInversa, '');
-	return result;
+		clozes.push(
+			tempTexto.substring(
+				inicioPos + MarcadorCloze.length,
+				fimPos
+			)
+		);
+
+		tempTexto =
+			tempTexto.substring(0, inicioPos) +
+			tempTexto.substring(fimPos + MarcadorCloze.length);
+		inicioPos = tempTexto.indexOf(MarcadorCloze);
+	}
+	textonew = texto;
+	for (i = 0; i < clozes.length; i++)
+	{
+		let alvo = MarcadorCloze + clozes[i] + MarcadorCloze;
+
+		textonew = textonew.replace(alvo, '(em outro card)');
+	}
+	return textonew;
 }
 
 
@@ -347,10 +370,10 @@ function ConverterSetaNormalParaCloze(texto)
 
 
 	        let resposta = resultado.substring(inicioRespostaCardIndexAjustado, finalRespostaCardIndex + 1).trim();
-		
+
 		resultado = resultado.substring(0, inicioRespostaCardIndex) +
 			MarcadorCloze + resposta + MarcadorCloze + resultado.substring(finalRespostaCardIndex + SinalMarcaFimSetaResposta.length);
-		
+
 		// procura a próxima seta depois da resposta recém-processada
 
 		inicioRespostaCardIndex = resultado.indexOf(MarcadorParagrafao, inicioRespostaCardIndex + MarcadorCloze.length + resposta.length + MarcadorCloze.length);
@@ -427,7 +450,8 @@ function TabsLista(linha)
 
 function criarCartoes(textoOriginal) 
 {
-  let i = 0, j = 0, k = 0, contadorCards = 0;
+	let i = 0, j = 0, k = 0, contadorCards = 0;
+	let iantesparagrafao = 0;
 
   let linhas = [];
   let linhasOriginais = [];
@@ -556,9 +580,10 @@ function criarCartoes(textoOriginal)
 			// PERGUNTA ABERTA - PEGAR TUDO ATÉ PONTO FINAL
 			else if ((linhaSendoAnalisada.trim().endsWith(MarcadorSetaNrl) || linhaSendoAnalisada.trim().endsWith(MarcadorParagrafao))) 
 			{
-				let linha1 = linhaSendoAnalisada;
-				linha1 = linha1.replace(MarcadorSetaNrl, '');
-				linha1 = linha1.replace(MarcadorParagrafao, '');
+				iantesparagrafao = i;
+				//let linha1 = linhaSendoAnalisada;
+				//linha1 = linha1.replace(MarcadorSetaNrl, '');
+				//linha1 = linha1.replace(MarcadorParagrafao, '');
 //				cardLista += linha1; 
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
@@ -569,6 +594,7 @@ function criarCartoes(textoOriginal)
     					i++;
 					linhaSendoAnalisada = linhas[i];
 
+					// TABELA //
 					if (linhaSendoAnalisada.trim().startsWith('|'))
 					{
 						if (TemTabela == false)
@@ -591,9 +617,11 @@ function criarCartoes(textoOriginal)
 						TemTabela = true;
 					}
 
+					// LINHAS SEM SER TABELA
+
 					if (linhaSendoAnalisada.trim() !== '') 
 					{
-    						cardLista += TabsLista(linhaSendoAnalisada) + '\n';
+    						cardLista += ConverterSetaNormalParaCloze(TabsLista(linhaSendoAnalisada)) + '\n';
 	 				}
 
 						
@@ -638,12 +666,13 @@ function criarCartoes(textoOriginal)
 //					linha1semomarcadorfinal = linha1.slice(0, indexUltimoMarcador) + linha1.slice(indexUltimoMarcador + MarcadorSetaNrl.length);
 //					cardLista = cardLista.replace(linha1, linha1semomarcadorfinal);
 //				}
-				cardLista = TabsLista(linha1) + MarcadorCloze + limparClozes(cardLista) + MarcadorCloze;
+				cardLista = MarcadorCloze + limparClozes(cardLista) + MarcadorCloze;
 				cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista);
 				cardLista = '';
 				contadorCards++;
 		//		contextoParagrafo = '';
 				TemTabela = false;
+				i = iantesparagrafao;
 			}
 
 			// INDIVIDUAL E LISTA - PEGAR SÓ LINHAS COM CLOZE OU SinalFazerLista
