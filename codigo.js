@@ -102,13 +102,60 @@ function TabelaFormatoTexto(cabecalho, entrada) {
   return resultado;
 }
 
+function TabelaFormatoTextoNEW(entrada) 
+{
+	let resultado = '';
+
+	let linhas = entrada.split(/\r?\n/);
+
+	for (let i = 0; i < linhas.length; i++) 
+	{
+		if (
+			linhas[i].includes('---') ||
+			linhas[i].trim() === ''
+		) 
+		{
+			continue;
+		}
+
+		let partes = linhas[i].split('|');
+
+		let linhaFormatada = '';
+
+		for (let j = 1; j < partes.length - 1; j++) 
+		{
+			let celula = (partes[j] || '').trim();
+
+			if (celula === '') continue;
+
+			if (linhaFormatada !== '')
+			{
+				linhaFormatada += ' // ';
+			}
+
+			linhaFormatada += celula;
+		}
+
+		if (linhaFormatada !== '')
+		{
+			resultado += linhaFormatada + '<br>\n';
+		}
+	}
+
+	resultado = limpaMarkdownProAnki(resultado);
+
+	return resultado;
+}
+
+
 function LinhaEContextoParagrafo(linha) 
 {
 	let result = false;
 	let linhaTrim = linha.trim();
 	//if (!linhaTrim.endsWith(MarcadorParagrafao)  && !linhaTrim.endsWith(MarcadorSetaNrl)  && (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')))	
-	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')) //linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
+	if  (linhaTrim.endsWith(':') || linhaTrim.endsWith('?')  && !linhaTrim.endsWith(MarcadorParagrafao))
 	{
+//linhaTrim.endsWith(MarcadorParagrafao) || linhaTrim.endsWith(MarcadorSetaNrl))
     		result = true;
   	}
 
@@ -510,8 +557,8 @@ function criarCartoes(textoOriginal)
 			else if ((linhaSendoAnalisada.trim().endsWith(MarcadorSetaNrl) || linhaSendoAnalisada.trim().endsWith(MarcadorParagrafao))) 
 			{
 				let linha1 = linhaSendoAnalisada;
-				linha1 = linha1.replace(MarcadorSetaNrl, '?');
-				linha1 = linha1.replace(MarcadorParagrafao, '?');
+				linha1 = linha1.replace(MarcadorSetaNrl, '');
+				linha1 = linha1.replace(MarcadorParagrafao, '');
 //				cardLista += linha1; 
 				// marcar como feito já na primeira linha; se marcar na última, não vai adiantar nada! Vai duplicar card
         			markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
@@ -526,7 +573,8 @@ function criarCartoes(textoOriginal)
 					{
 						if (TemTabela == false)
 						{
-							TabelaLinhaHeader = linhaSendoAnalisada;
+							TabelaLinhaHeader = TabelaFormatoTextoNEW(linhaSendoAnalisada);
+							cardLista += TabelaLinhaHeader;
 							linhaSendoAnalisada = '';
 						}
 						else
@@ -537,7 +585,7 @@ function criarCartoes(textoOriginal)
 							}
 							else
 							{
-								linhaSendoAnalisada = TabelaFormatoTexto(TabelaLinhaHeader, linhaSendoAnalisada);
+								linhaSendoAnalisada = TabelaFormatoTextoNEW(linhaSendoAnalisada);
 							}
 						}
 						TemTabela = true;
