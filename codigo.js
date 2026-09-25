@@ -727,7 +727,7 @@ function criarCartoes(textoOriginal)
 							}
 						}
 					}
-					cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + ConverterSetasParaCloze(cardLista)); // mecanismo 1
+					cardsCSV += GerarCardsClozeParaBasic(ConverterSetasParaCloze(contexto + contextoParagrafo + cardLista)); // mecanismo 1
 					//cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista); // mecanismo 2
 
 					markdownFinal = markdownFinal.replace(linhasOriginais[i], linhasOriginais[i] + SinalCardJaFeito);
