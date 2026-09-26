@@ -451,7 +451,7 @@ function TabsLista(linha)
 function criarCartoes(textoOriginal) 
 {
 	let i = 0, j = 0, k = 0, contadorCards = 0;
-	let iantesparagrafao = 0;
+	let iantesparagrafao = 0, ifimparagrafao =0;
 
   let linhas = [];
   let linhasOriginais = [];
@@ -627,6 +627,7 @@ function criarCartoes(textoOriginal)
 						
 					if (linhaSendoAnalisada.trim().endsWith('.'))
    					{
+						ifimparagrafao = i;
 						break;
   					}
 
@@ -707,6 +708,8 @@ function criarCartoes(textoOriginal)
 				{
 					 cardLista = linhaSendoAnalisada; // mecanismo 1 explicado acima
 					//cardLista = ConverterSetasParaCloze(linhaSendoAnalisada); // mecanismo 2
+					if (i > ifimparagrafao)
+					{// pra evitar 2 listas novamente, mas permitir ainda cards individuais dentro do paragrafão
 					if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 					{
 						cardLista = TabsLista(cardLista);
@@ -726,6 +729,7 @@ function criarCartoes(textoOriginal)
 			    					break;
 							}
 						}
+					}
 					}
 					cardsCSV += GerarCardsClozeParaBasic(ConverterSetasParaCloze(contexto + contextoParagrafo + cardLista)); // mecanismo 1
 					//cardsCSV += GerarCardsClozeParaBasic(contexto + contextoParagrafo + cardLista); // mecanismo 2
