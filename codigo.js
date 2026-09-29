@@ -360,7 +360,7 @@ function ConverterSetaNormalParaCloze(texto)
 			// Segunda iteração Agora você procura o próximo ??. Ele encontra: vc ?? sim. 
 			// Mas agora: resultado.indexOf(";", inicio) retorna -1 porque a última resposta termina com . e não com ;
 
-			finalRespostaCardIndex = resultado.lastIndexOf('.');
+			//finalRespostaCardIndex = resultado.lastIndexOf('.');
 
 			if (finalRespostaCardIndex === -1)
 			{
