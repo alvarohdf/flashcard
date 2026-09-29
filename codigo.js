@@ -710,6 +710,7 @@ function criarCartoes(textoOriginal)
 					//cardLista = ConverterSetasParaCloze(linhaSendoAnalisada); // mecanismo 2
 					if (i > ifimparagrafao)
 					{// pra evitar 2 listas novamente, mas permitir ainda cards individuais dentro do paragrafão
+
 					if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 					{
 						cardLista = TabsLista(cardLista);
@@ -717,6 +718,12 @@ function criarCartoes(textoOriginal)
 						{	
 							i++;
 							linhaSendoAnalisada = linhas[i];
+							if (linhaSendoAnalisada.trim() == '')
+							{
+									i++;
+									linhaSendoAnalisada = linhas[i];
+
+							}
 							if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 							{
 								 cardLista += TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
@@ -757,7 +764,7 @@ function criarCartoes(textoOriginal)
 			if (!linhaSendoAnalisada.trim().startsWith('-'))
 			{
     				contextoParagrafo = '';
-			}
+			}	
 		}
 		// -- OBTER CONTEXTOS joguei para cima era aqui
 		i++;
