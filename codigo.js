@@ -138,7 +138,7 @@ function TabelaFormatoTextoNEW(entrada)
 
 		if (linhaFormatada !== '')
 		{
-			resultado += linhaFormatada + '<br>\n';
+			resultado += linhaFormatada; //+ '<br>\n';
 		}
 	}
 
@@ -251,7 +251,7 @@ function GerarCardsClozeParaBasic(card)
 	}
 
 	// Modo antigo: 1 card por cloze
-	if (card.includes(CadaCloze1Card))
+	if (!card.includes(CadaCloze1Card))
 	{
 		for (i = 0; i < clozes.length; i++)
 		{
@@ -263,7 +263,7 @@ function GerarCardsClozeParaBasic(card)
 				let alvo = MarcadorCloze + clozes[j] + MarcadorCloze;
 
 				if (i === j)
-					textoPergunta = textoPergunta.replace(alvo, TxtPergunta);
+					textoPergunta = textoPergunta.replace(alvo, '(P1)');
 				else
 					textoPergunta = textoPergunta.replace(alvo, '...');
 			}
@@ -281,7 +281,7 @@ function GerarCardsClozeParaBasic(card)
 		for (i = 0; i < clozes.length; i++)
 		{
 			let alvo = MarcadorCloze + clozes[i] + MarcadorCloze;
-			textoPergunta = textoPergunta.replace(alvo, TxtPergunta + '(P' + (i+1) + ')');
+			textoPergunta = textoPergunta.replace(alvo, '(P' + (i+1) + ')');
 		}
 
 		// textoResposta = clozes.join('<br>');
@@ -470,6 +470,7 @@ function criarCartoes(textoOriginal)
   let tabelaMarkdownFinal = '';
   let TemTabela = false;
   let TabelaLinhaHeader = '';
+let tabelaconvertido = '';
 
   let cardsCSV = '';
 
@@ -536,7 +537,7 @@ function criarCartoes(textoOriginal)
 		{
 			if (contextoParagrafo != '')
 			{
-				contextoParagrafo += ' - ' + linhaSendoAnalisada;
+				contextoParagrafo += ' - ' + TabsLista(linhaSendoAnalisada) + '<br>';
 			}
 			else
 			{
@@ -557,24 +558,47 @@ function criarCartoes(textoOriginal)
 					i++;
 				//	j++;
   				}
+				TabelaLinhaHeader = TabelaFormatoTextoNEW(linhasTabela[0]) + '<br>';
 				// -- INICIAR CARDS TABELA --
   				for (j = 0; j < linhasTabela.length; j++) 
 				{
+					tabelaconvertido = TabelaFormatoTextoNEW(linhasTabela[j]);
 					if (ProcuraCloze(linhasTabela[j]) === true) 
 					{
-						cardsCSV += contexto + GerarCardsClozeParaBasic(ConverterSetasParaCloze(TabelaFormatoTexto(linhasTabela[0], linhasTabela[j])));
+						cardLista = tabelaconvertido;
+						if (tabelaconvertido.trim().endsWith(SinalFazerLista))
+						{
+
+							while (j < linhasTabela.length)
+							{	
+								j++;
+								tabelaconvertido = TabelaFormatoTextoNEW(linhasTabela[j]);
+								if (tabelaconvertido.trim().endsWith(SinalFazerLista))
+								{
+									 cardLista +=  '<br>' + tabelaconvertido; // mecanismo 1 explicado acima
+								}
+								else
+								{
+							 		cardLista += '<br>' + tabelaconvertido; // mecanismo 1 explicado acima
+			    						break;
+								}
+							}
+						}
+						cardsCSV += contexto + TabelaLinhaHeader + GerarCardsClozeParaBasic(ConverterSetasParaCloze(cardLista));
 						// MARKDOWN FINAL
 						let posBarraFinal = linhasOriginais[k].lastIndexOf('|');
 						let textoAntesBarra = linhasOriginais[k].substring(0, posBarraFinal);
 						let tabelaMarkdownFinal = linhasOriginais[k].replace(textoAntesBarra, textoAntesBarra.trim() + SinalCardJaFeito);
 						markdownFinal = markdownFinal.replace(linhasOriginais[k], tabelaMarkdownFinal);
 						contadorCards++;
+						cardLista = '';
 					}
-					k++;
-					if (linhasOriginais[k] === '') 
-					{
-      						k++;
-					}
+						
+				}
+				k++;
+				if (linhasOriginais[k] === '') 
+				{
+      					k++;
 				}
 			}
 			// PERGUNTA ABERTA - PEGAR TUDO ATÉ PONTO FINAL
@@ -621,7 +645,7 @@ function criarCartoes(textoOriginal)
 
 					if (linhaSendoAnalisada.trim() !== '') 
 					{
-    						cardLista += ConverterSetaNormalParaCloze(TabsLista(linhaSendoAnalisada)) + '\n';
+    						cardLista += ConverterSetaNormalParaCloze(TabsLista(linhaSendoAnalisada)) + '<br>\n';
 	 				}
 
 						
@@ -726,12 +750,12 @@ function criarCartoes(textoOriginal)
 							}
 							if (linhaSendoAnalisada.trim().endsWith(SinalFazerLista))
 							{
-								 cardLista += TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
+								 cardLista +=  '<br>' + TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
 								//cardLista += ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada)); // mecanismo 2 - linha por linha
 							}
 							else
 							{
-								 cardLista += TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
+								 cardLista += '<br>' + TabsLista(linhaSendoAnalisada); // mecanismo 1 explicado acima
 								//cardLista += ConverterSetasParaCloze(TabsLista(linhaSendoAnalisada)); // mecanismo 2 - linha por linha
 			    					break;
 							}
