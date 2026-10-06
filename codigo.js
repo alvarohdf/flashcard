@@ -562,7 +562,7 @@ let tabelaconvertido = '';
 				// -- INICIAR CARDS TABELA --
   				for (j = 0; j < linhasTabela.length; j++) 
 				{
-					tabelaconvertido = TabelaFormatoTextoNEW(linhasTabela[j]);
+					tabelaconvertido = TabelaLinhaHeader + TabelaFormatoTextoNEW(linhasTabela[j]);
 					if (ProcuraCloze(linhasTabela[j]) === true) 
 					{
 						cardLista = tabelaconvertido;
@@ -584,7 +584,7 @@ let tabelaconvertido = '';
 								}
 							}
 						}
-						cardsCSV += contexto + TabelaLinhaHeader + GerarCardsClozeParaBasic(ConverterSetasParaCloze(cardLista));
+						cardsCSV += contexto + GerarCardsClozeParaBasic(ConverterSetasParaCloze(cardLista));
 						// MARKDOWN FINAL
 						let posBarraFinal = linhasOriginais[k].lastIndexOf('|');
 						let textoAntesBarra = linhasOriginais[k].substring(0, posBarraFinal);
